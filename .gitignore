@@ -1,0 +1,8 @@
+.*
+!.gitignore
+
+*.pyc
+*.egg-info
+venv
+build
+dist
