@@ -1,8 +1,9 @@
+import sys
+import os
+import io
 import argparse
 import csv
-import os
-import sys
-import io
+import chardet
 
 def main():
     try:
@@ -28,16 +29,19 @@ def arguments():
 
 def read(filename, fields):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
-    file = sys.stdin if filename == '-' else io.open(filename)
+    file = sys.stdin if filename == '-' else io.open(filename, 'rb')
     text = file.read()
-    data = list(csv.reader(io.StringIO(text)))
+    text = text.decode(chardet.detect(text)['encoding'])
+    data_io = io.StringIO(text) if sys.version_info >= (3, 0) else io.BytesIO(text.encode('utf8'))
+    data = list(csv.reader(data_io))
     if len(data) < 2: raise Exception(filename + ': not enough data')
     headers = data[0]
     if fields is not None:
         for field in fields:
             if field not in headers: raise Exception(field + ': field not found')
     else: fields = headers
-    reader = csv.DictReader(io.StringIO(text))
+    reader_io = io.StringIO(text) if sys.version_info >= (3, 0) else io.BytesIO(text.encode('utf8'))
+    reader = csv.DictReader(reader_io)
     rows = {}
     for (i, row) in enumerate(reader):
         items = dict(row.items())

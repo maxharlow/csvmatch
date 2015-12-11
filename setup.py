@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='csvmatch',
-    version='1.0',
+    version='1.1',
     description='Find matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
@@ -10,6 +10,9 @@ setup(
     url='https://github.com/maxharlow/csvmatch',
     license='Apache',
     py_modules=['csvmatch'],
+    install_requires=[
+        'chardet==2.3.0'
+    ],
     entry_points = {
         'console_scripts': [
             'csvmatch = csvmatch:main'
