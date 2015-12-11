@@ -54,6 +54,7 @@ def match(data1, data2):
 def output(data1, data2, fields1, fields2, matches):
     output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
     writer = csv.DictWriter(output, fields1 + fields2)
+    writer.writeheader()
     for match in matches:
         row = data1.get(match[0])
         row.update(data2.get(match[1]))
