@@ -32,8 +32,8 @@ def read(filename, fields):
     file = sys.stdin if filename == '-' else io.open(filename, 'rb')
     text = file.read()
     if text == '': raise Exception(filename + ': file is empty')
-    text = text.decode(chardet.detect(text)['encoding'])
-    data_io = io.StringIO(text) if sys.version_info >= (3, 0) else io.BytesIO(text.encode('utf8'))
+    text_decoded = text.decode(chardet.detect(text)['encoding'])
+    data_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
     data = list(csv.reader(data_io))
     if len(data) < 2: raise Exception(filename + ': not enough data')
     headers = data[0]
@@ -41,7 +41,7 @@ def read(filename, fields):
         for field in fields:
             if field not in headers: raise Exception(field + ': field not found')
     else: fields = headers
-    reader_io = io.StringIO(text) if sys.version_info >= (3, 0) else io.BytesIO(text.encode('utf8'))
+    reader_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
     reader = csv.DictReader(reader_io)
     rows = {}
     for (i, row) in enumerate(reader):
