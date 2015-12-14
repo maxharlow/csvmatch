@@ -47,7 +47,7 @@ def read(filename, fields):
     for (i, row) in enumerate(reader):
         items = dict(row.items())
         rows[i] = { key: items[key] for key in fields }
-    return fields, dict(rows)
+    return fields, rows
 
 def match(data1, data2):
     matches = []
