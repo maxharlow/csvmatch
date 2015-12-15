@@ -55,9 +55,9 @@ def read(filename, fields):
         rows[i] = {key: items[key] for key in fields}
     return fields, rows
 
-def matcher(fuzzy):
-    if fuzzy == None: return match
-    elif fuzzy == 'bilenko':
+def matcher(algorithm):
+    if algorithm == None: return match
+    elif algorithm == 'bilenko':
         import fuzzybilenko
         return fuzzybilenko.match
     else: raise Exception(fuzzy + ': algorithm does not exist')

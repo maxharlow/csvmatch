@@ -14,7 +14,7 @@ setup(
     author_email='maxharlow@gmail.com',
     url='https://github.com/maxharlow/csvmatch',
     license='Apache',
-    py_modules=['csvmatch'],
+    packages=[''],
     install_requires=[
         'chardet==2.3.0',
         'colorama==0.3.5',

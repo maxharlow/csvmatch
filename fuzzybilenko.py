@@ -1,3 +1,4 @@
+import sys
 import dedupe
 import colorama
 
@@ -16,7 +17,6 @@ def match(data1, data2, fields1, fields2):
     pairs = linker.match(data1, data2_remapped, threshold)
     matches = []
     for pair in pairs:
-        print(pair[0][0],'- * -',pair[0][1])
         matches.append((pair[0][0], pair[0][1]))
     return matches
 
@@ -46,7 +46,8 @@ def labelling(linker):
             print('')
             responded = False
             while not responded:
-                response = input(colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Do these records refer to the same thing? [y/n/s/f]' + colorama.Style.RESET_ALL + ' ')
+                ask = input if sys.version_info >= (3, 0) else raw_input
+                response = ask(colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Do these records refer to the same thing? [y/n/s/f]' + colorama.Style.RESET_ALL + ' ')
                 responded = True
                 if   response == 'y': labels['match'].append(pair)
                 elif response == 'n': labels['distinct'].append(pair)
