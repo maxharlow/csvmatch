@@ -1,9 +1,14 @@
 from setuptools import setup
+import pip
+
+# horrible hack to ensure dedupe installs correctly
+pip.main(['install', 'numpy==1.10.1'])
+pip.main(['install', 'dedupe==1.2.2'])
 
 setup(
     name='csvmatch',
-    version='1.1',
-    description='Find matches between two CSV files in the terminal.',
+    version='1.2',
+    description='Find (fuzzy) matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
     author_email='maxharlow@gmail.com',
@@ -11,7 +16,9 @@ setup(
     license='Apache',
     py_modules=['csvmatch'],
     install_requires=[
-        'chardet==2.3.0'
+        'chardet==2.3.0',
+        'colorama==0.3.5',
+        'dedupe==1.2.2'
     ],
     entry_points = {
         'console_scripts': [
