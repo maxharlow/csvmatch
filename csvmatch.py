@@ -52,7 +52,7 @@ def read(filename, fields):
     rows = {}
     for i, row in enumerate(reader):
         items = dict(row.items())
-        rows[i] = {key: items[key] for key in fields}
+        rows[i] = {key: items[key] if sys.version_info >= (3, 0) else items[key].decode('utf8') for key in fields}
     return fields, rows
 
 def matcher(algorithm):
