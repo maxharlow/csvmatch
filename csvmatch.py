@@ -29,7 +29,7 @@ def arguments():
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match or not')
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
-        parser.print_help()
+        parser.print_help(sys.stderr)
         parser.exit(1)
     return args
 

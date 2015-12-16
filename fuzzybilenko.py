@@ -12,7 +12,7 @@ def match(data1, data2, fields1, fields2):
         try:
             linker.train()
             break
-        except ValueError: print('You need to do more training.')
+        except ValueError: sys.stderr.write('\nYou need to do more training.\n')
     threshold = linker.threshold(data1, data2_remapped, recall_weight=1)
     pairs = linker.match(data1, data2_remapped, threshold)
     matches = []
@@ -31,7 +31,7 @@ def remap(data, fields_new, fields_old):
 
 def labelling(linker):
     colorama.init()
-    print('\n' + colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Answer questions as follows:\n y - yes\n n - no\n s - skip\n f - finished' + colorama.Style.RESET_ALL)
+    sys.stderr.write('\n' + colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Answer questions as follows:\n y - yes\n n - no\n s - skip\n f - finished' + colorama.Style.RESET_ALL + '\n')
     labels = { 'distinct': [], 'match': [] }
     finished = False
     while not finished:
@@ -40,14 +40,14 @@ def labelling(linker):
                 labels['match'].append(pair)
                 continue
             for record in pair:
-                print('')
+                sys.stderr.write('\n')
                 for field in set(field.field for field in linker.data_model.primary_fields):
-                    print(colorama.Style.BRIGHT + field + ': ' + colorama.Style.RESET_ALL + record[field])
-            print('')
+                    sys.stderr.write(colorama.Style.BRIGHT + field + ': ' + colorama.Style.RESET_ALL + record[field] + '\n')
+            sys.stderr.write('\n')
             responded = False
             while not responded:
-                ask = input if sys.version_info >= (3, 0) else raw_input
-                response = ask(colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Do these records refer to the same thing? [y/n/s/f]' + colorama.Style.RESET_ALL + ' ')
+                sys.stderr.write(colorama.Style.BRIGHT + colorama.Fore.BLUE + 'Do these records refer to the same thing? [y/n/s/f]' + colorama.Style.RESET_ALL + ' ')
+                response = input() if sys.version_info >= (3, 0) else raw_input()
                 responded = True
                 if   response == 'y': labels['match'].append(pair)
                 elif response == 'n': labels['distinct'].append(pair)
