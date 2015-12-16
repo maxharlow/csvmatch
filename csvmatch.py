@@ -21,7 +21,7 @@ def main():
     except BaseException as e: sys.exit(e)
 
 def arguments():
-    parser = argparse.ArgumentParser(description='find matches between two CSV files')
+    parser = argparse.ArgumentParser(description='find (fuzzy) matches between two CSV files')
     parser.add_argument('FILE1', nargs='?', default='-', help='the first CSV file: results will be returned where this file matches the second file -- if omitted, will accept input on STDIN')
     parser.add_argument('FILE2', nargs='?', default='-', help='the second CSV file: results will be returned where the first file matches this one')
     parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first file that should be used (if not provided all will be used)')
