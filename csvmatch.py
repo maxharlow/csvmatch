@@ -71,11 +71,12 @@ def match(data1, data2, fields1, fields2):
 
 def output(data1, data2, fields1, fields2, matches):
     output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
-    writer = csv.DictWriter(output, fields1 + fields2)
-    writer.writeheader()
+    writer = csv.writer(output)
+    writer.writerow(fields1 + fields2)
     for match in matches:
-        row = data1.get(match[0])
-        row.update(data2.get(match[1]))
+        row = []
+        for field in fields1: row.append(data1.get(match[0]).get(field))
+        for field in fields2: row.append(data2.get(match[1]).get(field))
         writer.writerow(row)
     return output.getvalue()
 
