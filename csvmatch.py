@@ -77,7 +77,7 @@ def output(data1, data2, fields1, fields2, matches):
         row = []
         for field in fields1: row.append(data1.get(match[0]).get(field))
         for field in fields2: row.append(data2.get(match[1]).get(field))
-        writer.writerow(row)
+        writer.writerow([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     return output.getvalue()
 
 if __name__ == '__main__':
