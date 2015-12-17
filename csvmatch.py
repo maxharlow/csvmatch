@@ -66,6 +66,9 @@ def matcher(algorithm):
     elif algorithm == 'bilenko':
         import fuzzybilenko
         return fuzzybilenko.match
+    elif algorithm == 'levenshtein':
+        import fuzzylevenshtein
+        return fuzzylevenshtein.match
     elif algorithm == 'metaphone':
         import fuzzymetaphone
         return fuzzymetaphone.match

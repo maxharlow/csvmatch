@@ -19,6 +19,7 @@ setup(
         'chardet==2.3.0',
         'colorama==0.3.5',
         'dedupe==1.2.2',
+        'jellyfish==0.5.1',
         'metafone==0.5'
     ],
     entry_points = {
