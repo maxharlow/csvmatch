@@ -66,7 +66,10 @@ def match(data1, data2, fields1, fields2):
     matches = []
     for data1key, data1values in data1.items():
         for data2key, data2values in data2.items():
-            if set(data1values.values()) == set(data2values.values()): matches.append((data1key, data2key))
+            match = True
+            for field1, field2 in zip(fields1, fields2):
+                if data1values[field1] != data2values[field2]: match = False
+            if match: matches.append((data1key, data2key))
     return matches
 
 def output(data1, data2, fields1, fields2, matches):
