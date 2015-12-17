@@ -18,7 +18,8 @@ setup(
     install_requires=[
         'chardet==2.3.0',
         'colorama==0.3.5',
-        'dedupe==1.2.2'
+        'dedupe==1.2.2',
+        'metafone==0.5'
     ],
     entry_points = {
         'console_scripts': [

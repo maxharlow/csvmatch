@@ -60,6 +60,9 @@ def matcher(algorithm):
     elif algorithm == 'bilenko':
         import fuzzybilenko
         return fuzzybilenko.match
+    elif algorithm == 'metaphone':
+        import fuzzymetaphone
+        return fuzzymetaphone.match
     else: raise Exception(algorithm + ': algorithm does not exist')
 
 def match(data1, data2, fields1, fields2):

@@ -35,13 +35,13 @@ And another such as:
 ```
 name
 Maria Andreyevna Ostrakova
-Otto Leipzig
+Otto Leípzig
 George Smiley
 Peter Guillam
 Connie Sachs
 Saul Enderby
 Sam Collins
-Toby Esterhase
+Toby Esterházy
 Claus Kretzschmar
 ```
 
@@ -53,7 +53,6 @@ $ csvmatch data1.csv data2.csv
 name,name
 Peter Guillam,Peter Guillam
 George Smiley,George Smiley
-Toby Esterhase,Toby Esterhase
 Connie Sachs,Connie Sachs
 ```
 
@@ -81,3 +80,11 @@ $ csvmatch dataX.csv dataY.csv --fuzzy
 ```
 
 The more examples you give it, the better the results will be. At minimum, you should try to provide 10 positive matches and 10 negative matches.
+
+CSV Match also supports the [Double Metaphone] (https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) phonetic matching algorithm, which is based on how words are pronounced:
+
+```bash
+$ csvmatch data1.csv data2.csv --fuzzy metaphone
+```
+
+In the first example, an exact match missed that Toby Esterhase and Toby Esterházy are the same, despite being spelt differently. Metaphone will pick up such differences.
