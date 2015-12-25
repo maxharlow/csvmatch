@@ -4,6 +4,7 @@ import io
 import logging
 import warnings
 import argparse
+import re
 import csv
 import chardet
 
@@ -17,6 +18,7 @@ def main():
         fields2, data2 = read(args['FILE2'], args['fields2'])
         processes = [
             (process_lowercase, args['ignore_case']),
+            (process_strip_nonalpha, args['strip_nonalpha']),
             (process_sort, args['sort_words'])
         ]
         data1processed = processor(data1, processes)
@@ -33,6 +35,7 @@ def arguments():
     parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first file that should be used (if not provided all will be used)')
     parser.add_argument('-2', '--fields2', nargs='+', type=str, help='one or more column names from the second file that should be used (if not provided all will be used)')
     parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case insensitive matching (by default it is case sensitive)')
+    parser.add_argument('-a', '--strip-nonalpha', action='store_true', help='strip non-alphanumeric characters before comparisons')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match or not')
     args = vars(parser.parse_args())
@@ -52,6 +55,10 @@ def process_lowercase(data):
 
 def process_sort(data):
     return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}
+
+def process_strip_nonalpha(data):
+    regex = re.compile('[^A-Za-z0-9 ]')
+    return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
 
 def read(filename, fields):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
