@@ -18,6 +18,8 @@ def main():
         fields2, data2 = read(args['FILE2'], args['fields2'])
         processes = [
             (process_lowercase, args['ignore_case']),
+            (process_filter_titles(args['ignore_case']), args['filter_titles']),
+            (process_filter(args['filter'], args['ignore_case']), args['filter']),
             (process_strip_nonalpha, args['strip_nonalpha']),
             (process_sort, args['sort_words'])
         ]
@@ -35,6 +37,8 @@ def arguments():
     parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first file that should be used (if not provided all will be used)')
     parser.add_argument('-2', '--fields2', nargs='+', type=str, help='one or more column names from the second file that should be used (if not provided all will be used)')
     parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case insensitive matching (by default it is case sensitive)')
+    parser.add_argument('-l', '--filter', help='filter out terms from a given list before comparisons')
+    parser.add_argument('-t', '--filter-titles', action='store_true', help='filter out name titles (Mr, Ms, etc) before comparisons')
     parser.add_argument('-a', '--strip-nonalpha', action='store_true', help='strip non-alphanumeric characters before comparisons')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match, and an optional specified algorithm (bilenko, levenshtein, or metaphone, defaulting to bilenko)')
@@ -52,6 +56,18 @@ def processor(data, processes):
 
 def process_lowercase(data):
     return {key: {field: data[key][field].lower() for field in data[key]} for key in data}
+
+def process_filter(filename, ignore_case):
+    if filename == None: return
+    filters = [line[:-1] for line in io.open(filename)]
+    def filter(data):
+        regex = re.compile('(' + '|'.join(filters) + ')', re.IGNORECASE if ignore_case else 0)
+        return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
+    return filter
+
+def process_filter_titles(ignore_case):
+    titles = os.path.realpath('titles.txt')
+    return process_filter(titles, ignore_case)
 
 def process_sort(data):
     return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}

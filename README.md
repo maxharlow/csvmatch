@@ -64,7 +64,7 @@ George Smiley,George SMILEY
 Peter Guillam,Peter Guillam
 ```
 
-There are also options to strip non-alphanumeric characters (`-a`) and to sort words (`-s`) before comparisons.
+There are also options to strip non-alphanumeric characters (`-a`) and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.
 
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes.
 
