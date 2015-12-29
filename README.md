@@ -45,7 +45,7 @@ Tony Esterhase
 Claus Kretzschmar
 ```
 
-You can then find the matches:
+You can then find which rows match:
 
 ```bash
 $ csvmatch data1.csv data2.csv
@@ -64,6 +64,8 @@ George Smiley,George SMILEY
 Peter Guillam,Peter Guillam
 ```
 
+There are also options to strip non-alphanumeric characters (`-a`) and to sort words (`-s`) before comparisons.
+
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes.
 
 ```bash
@@ -81,9 +83,11 @@ Either file can also be piped in using `-` as a placeholder:
 $ cat data1.csv | csvmatch - data2.csv
 ```
 
-CSV Match also supports fuzzy matching.
+### Fuzzy matching
 
-### Fuzzy matching: Bilenko
+CSV Match also supports fuzzy matching. This can be combined with any of the above options.
+
+#### Bilenko
 
 The default fuzzy mode makes use of the [Dedupe library] (https://github.com/datamade/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
 
@@ -93,7 +97,7 @@ $ csvmatch data1.csv data2.csv --fuzzy
 
 The more examples you give it, the better the results will be. At minimum, you should try to provide 10 positive matches and 10 negative matches.
 
-### Fuzzy matching: Levenshtein
+#### Levenshtein
 
 [Damerau-Levenshtein] (https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric, which counts the number of changes that would have to be made to transform one string into another.
 
@@ -108,9 +112,9 @@ Toby Esterhase,Tony Esterhase
 Peter Guillam,Peter Guillam
 ```
 
-Here this matches Toby Esterhase and Tony Esterhase. Levenshtein is good at picking up typos and other small differences in spelling.
+Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at picking up typos and other small differences in spelling.
 
-### Fuzzy matching: Metaphone
+#### Metaphone
 
 [Double Metaphone] (https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) is a phonetic matching algorithm, which compares strings based on how they are pronounced:
 
@@ -123,4 +127,4 @@ Peter Guillam,Peter Guillam
 Connie Sachs,Konny Saks
 ```
 
-Here this matches Connie Sachs and Konny Saks, despite their very different spellings. Metaphone will pick up such differences.
+This shows a match for Connie Sachs and Konny Saks, despite their very different spellings.
