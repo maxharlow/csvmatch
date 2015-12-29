@@ -37,7 +37,7 @@ def arguments():
     parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case insensitive matching (by default it is case sensitive)')
     parser.add_argument('-a', '--strip-nonalpha', action='store_true', help='strip non-alphanumeric characters before comparisons')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
-    parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match or not')
+    parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match, and an optional specified algorithm (bilenko, levenshtein, or metaphone, defaulting to bilenko)')
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
         parser.print_help(sys.stderr)
