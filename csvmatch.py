@@ -66,7 +66,7 @@ def process_filter(filename, ignore_case):
     return filter
 
 def process_filter_titles(ignore_case):
-    titles = os.path.realpath('titles.txt')
+    titles = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
     return process_filter(titles, ignore_case)
 
 def process_sort(data):
