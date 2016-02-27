@@ -26,23 +26,24 @@ def main():
         data1processed = processor(data1, processes)
         data2processed = processor(data2, processes)
         matches = matcher(args['algorithm'])(data1processed, data2processed, fields1, fields2)
-        fields, data = join(data1, data2, fields1, fields2, matches)
+        fields, data = join(args['join'], data1, data2, fields1, fields2, matches)
         results = output(data, fields)
         print(results)
     except BaseException as e: sys.exit(e)
 
 def arguments():
     parser = argparse.ArgumentParser(description='find (fuzzy) matches between two CSV files')
-    parser.add_argument('FILE1', nargs='?', default='-', help='the first CSV file: results will be returned where this file matches the second file -- if omitted, will accept input on STDIN')
-    parser.add_argument('FILE2', nargs='?', default='-', help='the second CSV file: results will be returned where the first file matches this one')
-    parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first file that should be used (if not provided all will be used)')
-    parser.add_argument('-2', '--fields2', nargs='+', type=str, help='one or more column names from the second file that should be used (if not provided all will be used)')
-    parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case insensitive matching (by default it is case sensitive)')
-    parser.add_argument('-l', '--filter', help='filter out terms from a given list before comparisons')
+    parser.add_argument('FILE1', nargs='?', default='-', help='the first CSV file')
+    parser.add_argument('FILE2', nargs='?', default='-', help='the second CSV file')
+    parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first CSV file that should be used (all columns will be used otherwise)')
+    parser.add_argument('-2', '--fields2', nargs='+', type=str, help='one or more column names from the second CSV file that should be used (all columns will be used otherwise)')
+    parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case-insensitive matching (it is case-sensitive otherwise)')
+    parser.add_argument('-l', '--filter', help='filter out terms from a given newline-separated list of regular expressions before comparisons')
     parser.add_argument('-t', '--filter-titles', action='store_true', help='filter out name titles (Mr, Ms, etc) before comparisons')
     parser.add_argument('-a', '--strip-nonalpha', action='store_true', help='strip non-alphanumeric characters before comparisons')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
-    parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='whether to use a fuzzy match, and an optional specified algorithm (bilenko, levenshtein, or metaphone, defaulting to bilenko)')
+    parser.add_argument('-j', '--join', type=str, default='inner', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is an inner join)')
+    parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='use a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', or \'metaphone\' (default is \'bilenko\')')
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
         parser.print_help(sys.stderr)
@@ -122,13 +123,30 @@ def match(data1, data2, fields1, fields2):
             if match: matches.append((data1key, data2key))
     return matches
 
-def join(data1, data2, fields1, fields2, matches):
+def join(name, data1, data2, fields1, fields2, matches):
+    if name.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
+        raise Exception(name + ': join type not known')
     data = []
     for match in matches:
         row = []
         for field in fields1: row.append(data1.get(match[0]).get(field))
         for field in fields2: row.append(data2.get(match[1]).get(field))
         data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
+    if name.lower() == 'full-outer' or name.lower() == 'left-outer':
+        for key, value in data1.items():
+            if (key not in [match[0] for match in matches]):
+                row = []
+                for field in fields1: row.append(value.get(field))
+                for field in fields2: row.append('')
+                data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
+    if name.lower() == 'full-outer' or name.lower() == 'right-outer':
+        for key, value in data2.items():
+
+            if (key not in [match[1] for match in matches]):
+                row = []
+                for field in fields1: row.append('')
+                for field in fields2: row.append(value.get(field))
+                data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     return fields1 + fields2, data
 
 def output(data, fields):
