@@ -26,7 +26,8 @@ def main():
         data1processed = processor(data1, processes)
         data2processed = processor(data2, processes)
         matches = matcher(args['algorithm'])(data1processed, data2processed, fields1, fields2)
-        results = output(data1, data2, fields1, fields2, matches)
+        fields, data = join(data1, data2, fields1, fields2, matches)
+        results = output(data, fields)
         print(results)
     except BaseException as e: sys.exit(e)
 
@@ -121,15 +122,20 @@ def match(data1, data2, fields1, fields2):
             if match: matches.append((data1key, data2key))
     return matches
 
-def output(data1, data2, fields1, fields2, matches):
-    output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
-    writer = csv.writer(output)
-    writer.writerow(fields1 + fields2)
+def join(data1, data2, fields1, fields2, matches):
+    data = []
     for match in matches:
         row = []
         for field in fields1: row.append(data1.get(match[0]).get(field))
         for field in fields2: row.append(data2.get(match[1]).get(field))
-        writer.writerow([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
+        data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
+    return fields1 + fields2, data
+
+def output(data, fields):
+    output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
+    writer = csv.writer(output)
+    writer.writerow(fields)
+    writer.writerows(data)
     return output.getvalue()
 
 if __name__ == '__main__':
