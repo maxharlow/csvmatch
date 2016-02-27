@@ -2,8 +2,8 @@ from setuptools import setup
 import pip
 
 # horrible hack to ensure dedupe installs correctly
-pip.main(['install', 'numpy==1.10.1'])
-pip.main(['install', 'dedupe==1.2.2'])
+pip.main(['install', 'numpy==1.10.2'])
+pip.main(['install', 'dedupe==1.3.1'])
 
 setup(
     name='csvmatch',
@@ -18,7 +18,7 @@ setup(
     install_requires=[
         'chardet==2.3.0',
         'colorama==0.3.5',
-        'dedupe==1.2.2',
+        'dedupe==1.3.1',
         'jellyfish==0.5.1',
         'metafone==0.5'
     ],
