@@ -83,6 +83,8 @@ Either file can also be piped in using `-` as a placeholder:
 $ cat data1.csv | csvmatch - data2.csv
 ```
 
+By default the two files are linked using an inner join -- only successful matches are returned. However using `-f` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
+
 ### Fuzzy matching
 
 CSV Match also supports fuzzy matching. This can be combined with any of the above options.
