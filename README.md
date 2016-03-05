@@ -77,10 +77,14 @@ $ csvmatch dataA.csv dataB.csv \
 
 (This example also uses output redirection to save the results to a file.)
 
-Either file can also be piped in using `-` as a placeholder:
+By default the columns used in the output are the same ones used for matching. Other sets of columns can be specified using the `--output` parameter. This takes a space-separated list of column names, each prefixed with a number and a dot indicating which file that field is from:
 
 ```bash
-$ cat data1.csv | csvmatch - data2.csv
+$ csvmatch dataA.csv dataB.csv \
+    --fields1 name address \
+    --fields2 'Person Name' Address \
+    --output 1.name '2.Person Name' 2.Address \
+    > results.csv
 ```
 
 By default the two files are linked using an inner join -- only successful matches are returned. However using `-f` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
