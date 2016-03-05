@@ -26,7 +26,8 @@ def main():
         data1processed = processor(data1, processes)
         data2processed = processor(data2, processes)
         matches = matcher(args['algorithm'])(data1processed, data2processed, fields1, fields2)
-        fields, data = join(args['join'], data1, data2, fields1, fields2, matches)
+        fields = prepare(fields1, fields2)
+        data = join(args['join'], data1, data2, fields, matches)
         results = output(data, fields)
         print(results)
     except BaseException as e: sys.exit(e)
@@ -123,36 +124,41 @@ def match(data1, data2, fields1, fields2):
             if match: matches.append((data1key, data2key))
     return matches
 
-def join(name, data1, data2, fields1, fields2, matches):
+def prepare(fields1, fields2):
+    return [(1, field) for field in fields1] + [(2, field) for field in fields2]
+
+def join(name, data1, data2, fields, matches):
     if name.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
         raise Exception(name + ': join type not known')
     data = []
     for match in matches:
         row = []
-        for field in fields1: row.append(data1.get(match[0]).get(field))
-        for field in fields2: row.append(data2.get(match[1]).get(field))
+        for field in fields:
+            if field[0] == 1: row.append(data1.get(match[0]).get(field[1]))
+            elif field[0] == 2: row.append(data2.get(match[1]).get(field[1]))
         data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'left-outer':
         for key, value in data1.items():
             if (key not in [match[0] for match in matches]):
                 row = []
-                for field in fields1: row.append(value.get(field))
-                for field in fields2: row.append('')
+                for field in fields:
+                    if field[0] == 1: row.append(value.get(field[1]))
+                    elif field[0] == 2: row.append('')
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'right-outer':
         for key, value in data2.items():
-
             if (key not in [match[1] for match in matches]):
                 row = []
-                for field in fields1: row.append('')
-                for field in fields2: row.append(value.get(field))
+                for field in fields:
+                    if field[0] == 1: row.append('')
+                    elif field[0] == 2: row.append(value.get(field[1]))
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
-    return fields1 + fields2, data
+    return data
 
 def output(data, fields):
     output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
     writer = csv.writer(output)
-    writer.writerow(fields)
+    writer.writerow([field[1] for field in fields])
     writer.writerows(data)
     return output.getvalue()
 
