@@ -14,8 +14,16 @@ def main():
     warnings.formatwarning = lambda e, *args: str(e)
     try:
         args = arguments()
-        fields1, data1 = read(args['FILE1'], args['fields1'])
-        fields2, data2 = read(args['FILE2'], args['fields2'])
+        headers1, data1 = read(args['FILE1'])
+        headers2, data2 = read(args['FILE2'])
+        fields1 = args['fields1'] if args['fields1'] else headers1
+        fields2 = args['fields2'] if args['fields2'] else headers2
+        for field in fields1:
+            if field not in headers1: raise Exception(field + ': field not found')
+        for field in fields2:
+            if field not in headers2: raise Exception(field + ': field not found')
+        if len(fields1) != len(fields2):
+            raise Exception('both files must have the same number of columns specified')
         processes = [
             (process_lowercase, args['ignore_case']),
             (process_filter_titles(args['ignore_case']), args['filter_titles']),
@@ -26,7 +34,7 @@ def main():
         data1processed = processor(data1, processes)
         data2processed = processor(data2, processes)
         matches = matcher(args['algorithm'])(data1processed, data2processed, fields1, fields2)
-        fields = prepare(fields1, fields2)
+        fields = format(args['output'], headers1, headers2, fields1, fields2)
         data = join(args['join'], data1, data2, fields, matches)
         results = output(data, fields)
         print(results)
@@ -44,6 +52,7 @@ def arguments():
     parser.add_argument('-a', '--strip-nonalpha', action='store_true', help='strip non-alphanumeric characters before comparisons')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
     parser.add_argument('-j', '--join', type=str, default='inner', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is an inner join)')
+    parser.add_argument('-o', '--output', nargs='+', type=str, help='fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (otherwise uses whatever fields were used for comparisions)')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='use a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', or \'metaphone\' (default is \'bilenko\')')
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
@@ -79,7 +88,7 @@ def process_strip_nonalpha(data):
     regex = re.compile('[^A-Za-z0-9 ]')
     return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
 
-def read(filename, fields):
+def read(filename):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
     file = sys.stdin if filename == '-' else io.open(filename, 'rb')
     text = file.read()
@@ -89,17 +98,13 @@ def read(filename, fields):
     data = list(csv.reader(data_io))
     if len(data) < 2: raise Exception(filename + ': not enough data')
     headers = data[0]
-    if fields is not None:
-        for field in fields:
-            if field not in headers: raise Exception(field + ': field not found')
-    else: fields = headers
     reader_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
     reader = csv.DictReader(reader_io)
     rows = {}
     for i, row in enumerate(reader):
         items = dict(row.items())
-        rows[i] = {key: items[key] if sys.version_info >= (3, 0) else items[key].decode('utf8') for key in fields}
-    return fields, rows
+        rows[i] = {key: items[key] if sys.version_info >= (3, 0) else items[key].decode('utf8') for key in headers}
+    return headers, rows
 
 def matcher(algorithm):
     if algorithm == None: return match
@@ -124,8 +129,17 @@ def match(data1, data2, fields1, fields2):
             if match: matches.append((data1key, data2key))
     return matches
 
-def prepare(fields1, fields2):
-    return [(1, field) for field in fields1] + [(2, field) for field in fields2]
+def format(headerlist, headers1, headers2, fields1, fields2):
+    if headerlist == None: return [('1', field) for field in fields1] + [('2', field) for field in fields2]
+    headers = []
+    for headerdef in headerlist:
+        if not re.match('^[1|2]\..*', headerdef):
+            raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
+        header = headerdef.split('.', 1)
+        if (header[0] == '1' and header[1] not in headers1) or (header[0] == '2' and header[1] not in headers2):
+            raise Exception(header[1] + ': field not found in file ' + header[0])
+        headers.append((header[0], header[1]))
+    return headers
 
 def join(name, data1, data2, fields, matches):
     if name.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
@@ -134,24 +148,24 @@ def join(name, data1, data2, fields, matches):
     for match in matches:
         row = []
         for field in fields:
-            if field[0] == 1: row.append(data1.get(match[0]).get(field[1]))
-            elif field[0] == 2: row.append(data2.get(match[1]).get(field[1]))
+            if field[0] == '1': row.append(data1.get(match[0]).get(field[1]))
+            elif field[0] == '2': row.append(data2.get(match[1]).get(field[1]))
         data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'left-outer':
         for key, value in data1.items():
             if (key not in [match[0] for match in matches]):
                 row = []
                 for field in fields:
-                    if field[0] == 1: row.append(value.get(field[1]))
-                    elif field[0] == 2: row.append('')
+                    if field[0] == '1': row.append(value.get(field[1]))
+                    elif field[0] == '2': row.append('')
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'right-outer':
         for key, value in data2.items():
             if (key not in [match[1] for match in matches]):
                 row = []
                 for field in fields:
-                    if field[0] == 1: row.append('')
-                    elif field[0] == 2: row.append(value.get(field[1]))
+                    if field[0] == '1': row.append('')
+                    elif field[0] == '2': row.append(value.get(field[1]))
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     return data
 
