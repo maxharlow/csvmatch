@@ -7,7 +7,7 @@ pip.main(['install', 'dedupe==1.3.1'])
 
 setup(
     name='csvmatch',
-    version='1.9',
+    version='1.10',
     description='Find (fuzzy) matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
