@@ -3,6 +3,8 @@ CSV Match
 
 Find (fuzzy) matches between two CSV files in the terminal.
 
+Part of a set of terminal-based CSV tools, also including [CSV Pivot] (https://github.com/maxharlow/csvpivot) and [CSV Bar] (https://github.com/maxharlow/csvbar).
+
 Tested on Python 2.7 and 3.5.
 
 
