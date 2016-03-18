@@ -20,76 +20,77 @@ Usage
 Say you have one CSV file such as:
 
 ```
-name
-George Smiley
-Percy Alleline
-Roy Bland
-Toby Esterhase
-Peter Guillam
-Bill Haydon
-Oliver Lacon
-Jim Prideaux
-Connie Sachs
+name,location,codename
+George Smiley,London,Beggerman
+Percy Alleline,London,Tinker
+Roy Bland,London,Soldier
+Toby Esterhase,Vienna,Poorman
+Peter Guillam,Brixton,none
+Bill Haydon,London,Tailor
+Oliver Lacon,London,none
+Jim Prideaux,Slovakia,none
+Connie Sachs,Oxford,none
 ```
 
 And another such as:
 
 ```
-name
-Maria Andreyevna Ostrakova
-Otto Leipzig
-George SMILEY
-Peter Guillam
-Konny Saks
-Saul Enderby
-Sam Collins
-Tony Esterhase
-Claus Kretzschmar
+Person Name,Location
+Maria Andreyevna Ostrakova,Russia
+Otto Leipzig,Estonia
+George SMILEY,London
+Peter Guillam,Brixton
+Konny Saks,Oxford
+Saul Enderby,London
+Sam Collins,Vietnam
+Tony Esterhase,Vienna
+Claus Kretzschmar,Hamburg
 ```
 
-You can then find which rows match:
+You can then find which names are in both files:
 
 ```bash
-$ csvmatch data1.csv data2.csv
-
-name,name
-Peter Guillam,Peter Guillam
+$ csvmatch data1.csv data2.csv \
+    --fields1 name \
+    --fields2 'Person Name'
 ```
 
-By default this is case-sensitive. We can make it case insensitive with `-i`:
+You can also compare multiple columns, so if we wanted to find which name and location combinations are in both files we could:
 
 ```bash
-$ csvmatch data1.csv data2.csv -i
-
-name,name
-George Smiley,George SMILEY
-Peter Guillam,Peter Guillam
+$ csvmatch data1.csv data2.csv \
+    --fields1 name location \
+    --fields2 'Person Name' Location
 ```
+
+By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but can be made case-insensitive with `-i`.
 
 There are also options to strip non-alphanumeric characters (`-a`) and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.
-
-By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes.
-
-```bash
-$ csvmatch dataA.csv dataB.csv \
-    --fields1 name address \
-    --fields2 'Person Name' Address \
-	> results.csv
-```
-
-(This example also uses output redirection to save the results to a file.)
 
 By default the columns used in the output are the same ones used for matching. Other sets of columns can be specified using the `--output` parameter. This takes a space-separated list of column names, each prefixed with a number and a dot indicating which file that field is from:
 
 ```bash
-$ csvmatch dataA.csv dataB.csv \
-    --fields1 name address \
-    --fields2 'Person Name' Address \
-    --output 1.name '2.Person Name' 2.Address \
+$ csvmatch data1.csv data2.csv \
+    --fields1 name location \
+    --fields2 'Person Name' Location \
+    --output 1.name '2.Person Name' 2.Location \
     > results.csv
 ```
 
+There are also some special column definitions. `1*` and `2*` expand into all columns from that file.
+
 By default the two files are linked using an inner join -- only successful matches are returned. However using `-f` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
+
+We can combine some of the above options to perform operations alike Excel's `VLOOKUP`. So if we wanted to add a column to `data2.csv` giving the codename of each person that is specified in `data1.csv`:
+
+```bash
+$ csvmatch data1.csv data2.csv \
+    --fields1 name \
+    --fields2 'Person Name' \
+    --join right-outer \
+    --output 2* 1.codename \
+    > results.csv
+```
 
 ### Fuzzy matching
 
