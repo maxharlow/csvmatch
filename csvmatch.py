@@ -143,7 +143,7 @@ def format(headerlist, headers1, headers2, fields1, fields2):
             if number == '1': headers = headers + [('1', h) for h in headers1]
             elif number == '2': headers = headers + [('2', h) for h in headers2]
         else: raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
-        return headers
+    return headers
 
 def join(name, data1, data2, fields, matches):
     if name.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
