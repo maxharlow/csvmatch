@@ -133,13 +133,17 @@ def format(headerlist, headers1, headers2, fields1, fields2):
     if headerlist == None: return [('1', field) for field in fields1] + [('2', field) for field in fields2]
     headers = []
     for headerdef in headerlist:
-        if not re.match('^[1|2]\..*', headerdef):
-            raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
-        header = headerdef.split('.', 1)
-        if (header[0] == '1' and header[1] not in headers1) or (header[0] == '2' and header[1] not in headers2):
-            raise Exception(header[1] + ': field not found in file ' + header[0])
-        headers.append((header[0], header[1]))
-    return headers
+        if re.match('^[1|2]\..*', headerdef): # standard header definitions
+            header = headerdef.split('.', 1)
+            if (header[0] == '1' and header[1] not in headers1) or (header[0] == '2' and header[1] not in headers2):
+                raise Exception(header[1] + ': field not found in file ' + header[0])
+            headers.append((header[0], header[1]))
+        elif re.match('^[1|2]\*$', headerdef): # expand 1* and 2* to all columns from that file
+            number = headerdef.split('*')[0]
+            if number == '1': headers = headers + [('1', h) for h in headers1]
+            elif number == '2': headers = headers + [('2', h) for h in headers2]
+        else: raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
+        return headers
 
 def join(name, data1, data2, fields, matches):
     if name.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
