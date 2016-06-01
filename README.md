@@ -136,3 +136,9 @@ Connie Sachs,Konny Saks
 ```
 
 This shows a match for Connie Sachs and Konny Saks, despite their very different spellings.
+
+
+A note on uniqueness
+--------------------
+
+Both with exact matches and fuzzy matching a name being the same is [no guarantee] (https://en.wikipedia.org/wiki/List_of_most_popular_given_names) it refers to the same person. But the inverse is also true -- even with CSV Match, a combination of first inital and last name is likely to be sufficiently different from forename, middle names, and surname together that a match is unlikely. Moreso if one name includes a typo, either accidential or deliberate.
