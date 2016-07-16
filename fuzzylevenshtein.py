@@ -1,4 +1,4 @@
-import jellyfish
+import jellyfish._jellyfish as jellyfish # forces non-C version, which supports Unicode characters
 
 def match(data1, data2, fields1, fields2):
     threshold = 0.4
