@@ -14,8 +14,8 @@ def main():
     warnings.formatwarning = lambda e, *args: str(e)
     try:
         args = arguments()
-        headers1, data1 = read(args['FILE1'])
-        headers2, data2 = read(args['FILE2'])
+        headers1, data1 = read(args['FILE1'], args['enc1'])
+        headers2, data2 = read(args['FILE2'], args['enc2'])
         fields1 = args['fields1'] if args['fields1'] else headers1
         fields2 = args['fields2'] if args['fields2'] else headers2
         for field in fields1:
@@ -46,6 +46,8 @@ def arguments():
     parser.add_argument('FILE2', nargs='?', default='-', help='the second CSV file')
     parser.add_argument('-1', '--fields1', nargs='+', type=str, help='one or more column names from the first CSV file that should be used (all columns will be used otherwise)')
     parser.add_argument('-2', '--fields2', nargs='+', type=str, help='one or more column names from the second CSV file that should be used (all columns will be used otherwise)')
+    parser.add_argument('--enc1', type=str, help='encoding of the first file (autodetected otherwise)')
+    parser.add_argument('--enc2', type=str, help='encoding of the second file (autodetected otherwise)')
     parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case-insensitive matching (it is case-sensitive otherwise)')
     parser.add_argument('-l', '--filter', help='filter out terms from a given newline-separated list of regular expressions before comparisons')
     parser.add_argument('-t', '--filter-titles', action='store_true', help='filter out name titles (Mr, Ms, etc) before comparisons')
@@ -88,12 +90,15 @@ def process_strip_nonalpha(data):
     regex = re.compile('[^A-Za-z0-9 ]')
     return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
 
-def read(filename):
+def read(filename, encoding):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
     file = sys.stdin if filename == '-' else io.open(filename, 'rb')
     text = file.read()
     if text == '': raise Exception(filename + ': file is empty')
-    text_decoded = text.decode(chardet.detect(text)['encoding'])
+    if not encoding:
+        encoding = chardet.detect(text)['encoding'] # can't always be relied upon
+        sys.stderr.write(filename + ': detected character encoding as ' + encoding + '\n')
+    text_decoded = text.decode(encoding)
     data_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
     data = list(csv.reader(data_io))
     if len(data) < 2: raise Exception(filename + ': not enough data')
