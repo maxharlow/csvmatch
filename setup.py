@@ -1,10 +1,6 @@
 from setuptools import setup
 import pip
 
-# horrible hack to ensure dedupe installs correctly
-pip.main(['install', 'numpy==1.11.1'])
-pip.main(['install', 'dedupe==1.4.15'])
-
 setup(
     name='csvmatch',
     version='1.10',
