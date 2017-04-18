@@ -3,7 +3,7 @@ CSV Match
 
 Find (fuzzy) matches between two CSV files in the terminal.
 
-Part of a set of terminal-based CSV tools, also including [CSV Pivot] (https://github.com/maxharlow/csvpivot) and [CSV Bar] (https://github.com/maxharlow/csvbar).
+Part of a set of terminal-based CSV tools, also including [CSV Pivot](https://github.com/maxharlow/csvpivot) and [CSV Bar](https://github.com/maxharlow/csvbar).
 
 Tested on Python 2.7 and 3.5.
 
@@ -98,7 +98,7 @@ CSV Match also supports fuzzy matching. This can be combined with any of the abo
 
 #### Bilenko
 
-The default fuzzy mode makes use of the [Dedupe library] (https://github.com/datamade/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
+The default fuzzy mode makes use of the [Dedupe library](https://github.com/datamade/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
 
 ```bash
 $ csvmatch data1.csv data2.csv --fuzzy
@@ -108,7 +108,7 @@ The more examples you give it, the better the results will be. At minimum, you s
 
 #### Levenshtein
 
-[Damerau-Levenshtein] (https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric, which counts the number of changes that would have to be made to transform one string into another.
+[Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric, which counts the number of changes that would have to be made to transform one string into another.
 
 For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one.
 
@@ -125,7 +125,7 @@ Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at pi
 
 #### Metaphone
 
-[Double Metaphone] (https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) is a phonetic matching algorithm, which compares strings based on how they are pronounced:
+[Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) is a phonetic matching algorithm, which compares strings based on how they are pronounced:
 
 ```bash
 $ csvmatch data1.csv data2.csv --fuzzy metaphone
@@ -142,4 +142,4 @@ This shows a match for Connie Sachs and Konny Saks, despite their very different
 A note on uniqueness
 --------------------
 
-Both with exact matches and fuzzy matching a name being the same is [no guarantee] (https://en.wikipedia.org/wiki/List_of_most_popular_given_names) it refers to the same person. But the inverse is also true -- even with CSV Match, a combination of first inital and last name is likely to be sufficiently different from forename, middle names, and surname together that a match is unlikely. Moreso if one name includes a typo, either accidential or deliberate.
+Both with exact matches and fuzzy matching a name being the same is [no guarantee](https://en.wikipedia.org/wiki/List_of_most_popular_given_names) it refers to the same person. But the inverse is also true -- even with CSV Match, a combination of first inital and last name is likely to be sufficiently different from forename, middle names, and surname together that a match is unlikely. Moreso if one name includes a typo, either accidential or deliberate.
