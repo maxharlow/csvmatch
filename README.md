@@ -65,7 +65,7 @@ $ csvmatch data1.csv data2.csv \
 
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but can be made case-insensitive with `-i`.
 
-There are also options to strip non-alphanumeric characters (`-a`) and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.
+There are also options to ignore non-alphanumeric characters (`-a`), to convert to the latin alphabet (`-n`), and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.
 
 By default the columns used in the output are the same ones used for matching. Other sets of columns can be specified using the `--output` parameter. This takes a space-separated list of column names, each prefixed with a number and a dot indicating which file that field is from:
 
