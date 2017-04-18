@@ -7,6 +7,7 @@ import argparse
 import re
 import csv
 import chardet
+import unidecode
 
 def main():
     logging.captureWarnings(True)
@@ -29,6 +30,7 @@ def main():
             (process_filter_titles(args['ignore_case']), args['filter_titles']),
             (process_filter(args['filter'], args['ignore_case']), args['filter']),
             (process_ignore_nonalpha, args['ignore_nonalpha']),
+            (process_as_latin, args['as_latin']),
             (process_sort, args['sort_words'])
         ]
         data1processed = processor(data1, processes)
@@ -51,7 +53,8 @@ def arguments():
     parser.add_argument('-i', '--ignore-case', action='store_true', help='perform case-insensitive matching (it is case-sensitive otherwise)')
     parser.add_argument('-l', '--filter', help='filter out terms from a given newline-separated list of regular expressions before comparisons')
     parser.add_argument('-t', '--filter-titles', action='store_true', help='filter out name titles (Mr, Ms, etc) before comparisons')
-    parser.add_argument('-a', '--ignore-nonalpha', action='store_true', help='ignore non-alphanumeric characters before comparisons')
+    parser.add_argument('-a', '--ignore-nonalpha', action='store_true', help='ignore non-alphanumeric characters')
+    parser.add_argument('-n', '--as-latin', action='store_true', help='convert to latin alphabet before comparisions')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically before comparisons')
     parser.add_argument('-j', '--join', type=str, default='inner', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is an inner join)')
     parser.add_argument('-o', '--output', nargs='+', type=str, help='fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (otherwise uses whatever fields were used for comparisions)')
@@ -82,6 +85,9 @@ def process_filter(filename, ignore_case):
 def process_filter_titles(ignore_case):
     titles = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
     return process_filter(titles, ignore_case)
+
+def process_as_latin(data):
+    return {key: {field: unidecode.unidecode(data[key][field]) for field in data[key]} for key in data}
 
 def process_sort(data):
     return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}
