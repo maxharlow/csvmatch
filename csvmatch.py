@@ -90,7 +90,7 @@ def process_as_latin(data):
     return {key: {field: unidecode.unidecode(data[key][field]) for field in data[key]} for key in data}
 
 def process_ignore_nonalpha(data):
-    regex = re.compile('[^A-Za-z0-9 ]')
+    regex = re.compile('[^A-Za-z0-9 ]') # does not take into account non-latin alphabet
     return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
 
 def process_sort_words(data):
