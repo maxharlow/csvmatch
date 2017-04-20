@@ -29,8 +29,8 @@ def main():
             (process_ignore_case, args['ignore_case']),
             (process_filter_titles(args['ignore_case']), args['filter_titles']),
             (process_filter(args['filter'], args['ignore_case']), args['filter']),
-            (process_ignore_nonalpha, args['ignore_nonalpha']),
             (process_as_latin, args['as_latin']),
+            (process_ignore_nonalpha, args['ignore_nonalpha']),
             (process_sort_words, args['sort_words'])
         ]
         data1processed = processor(data1, processes)
@@ -89,12 +89,12 @@ def process_filter_titles(ignore_case):
 def process_as_latin(data):
     return {key: {field: unidecode.unidecode(data[key][field]) for field in data[key]} for key in data}
 
-def process_sort_words(data):
-    return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}
-
 def process_ignore_nonalpha(data):
     regex = re.compile('[^A-Za-z0-9 ]')
     return {key: {field: regex.sub('', data[key][field]) for field in data[key]} for key in data}
+
+def process_sort_words(data):
+    return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}
 
 def read(filename, encoding):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
