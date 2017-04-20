@@ -26,12 +26,12 @@ def main():
         if len(fields1) != len(fields2):
             raise Exception('both files must have the same number of columns specified')
         processes = [
-            (process_lowercase, args['ignore_case']),
+            (process_ignore_case, args['ignore_case']),
             (process_filter_titles(args['ignore_case']), args['filter_titles']),
             (process_filter(args['filter'], args['ignore_case']), args['filter']),
             (process_ignore_nonalpha, args['ignore_nonalpha']),
             (process_as_latin, args['as_latin']),
-            (process_sort, args['sort_words'])
+            (process_sort_words, args['sort_words'])
         ]
         data1processed = processor(data1, processes)
         data2processed = processor(data2, processes)
@@ -71,7 +71,7 @@ def processor(data, processes):
         data_processed = process(data_processed) if selected else data_processed
     return data_processed
 
-def process_lowercase(data):
+def process_ignore_case(data):
     return {key: {field: data[key][field].lower() for field in data[key]} for key in data}
 
 def process_filter(filename, ignore_case):
@@ -89,7 +89,7 @@ def process_filter_titles(ignore_case):
 def process_as_latin(data):
     return {key: {field: unidecode.unidecode(data[key][field]) for field in data[key]} for key in data}
 
-def process_sort(data):
+def process_sort_words(data):
     return {key: {field: ' '.join(sorted(data[key][field].split(' '))) for field in data[key]} for key in data}
 
 def process_ignore_nonalpha(data):
