@@ -176,6 +176,7 @@ def join(name, data1, data2, fields, matches):
                 for field in fields:
                     if field[0] == '1': row.append(value.get(field[1]))
                     elif field[0] == '2': row.append('')
+                    elif field[0] == '-': row.append('')
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'right-outer':
         for key, value in data2.items():
@@ -184,6 +185,7 @@ def join(name, data1, data2, fields, matches):
                 for field in fields:
                     if field[0] == '1': row.append('')
                     elif field[0] == '2': row.append(value.get(field[1]))
+                    elif field[0] == '-': row.append('')
                 data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     return data
 
