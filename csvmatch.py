@@ -137,7 +137,7 @@ def match(data1, data2, fields1, fields2):
             match = True
             for field1, field2 in zip(fields1, fields2):
                 if data1values[field1] != data2values[field2]: match = False
-            if match: matches.append((data1key, data2key))
+            if match: matches.append((data1key, data2key, 1))
     return matches
 
 def format(headerlist, headers1, headers2, fields1, fields2):
@@ -153,6 +153,8 @@ def format(headerlist, headers1, headers2, fields1, fields2):
             number = headerdef.split('*')[0]
             if number == '1': headers = headers + [('1', h) for h in headers1]
             elif number == '2': headers = headers + [('2', h) for h in headers2]
+        elif headerdef == 'degree': # the matching degree
+            headers.append(('-', 'degree'))
         else: raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
     return headers
 
@@ -165,6 +167,7 @@ def join(name, data1, data2, fields, matches):
         for field in fields:
             if field[0] == '1': row.append(data1.get(match[0]).get(field[1]))
             elif field[0] == '2': row.append(data2.get(match[1]).get(field[1]))
+            elif field[0] == '-': row.append(str(match[2]))
         data.append([value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row])
     if name.lower() == 'full-outer' or name.lower() == 'left-outer':
         for key, value in data1.items():

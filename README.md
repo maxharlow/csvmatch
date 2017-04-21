@@ -77,7 +77,7 @@ $ csvmatch data1.csv data2.csv \
     > results.csv
 ```
 
-There are also some special column definitions. `1*` and `2*` expand into all columns from that file.
+There are also some special column definitions. `1*` and `2*` expand into all columns from that file. Where a fuzzy matching algorithm has been used `degree` will add a column with a number between 0 - 1 indicating the strength of each match.
 
 By default the two files are linked using an inner join -- only successful matches are returned. However using `-f` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
 

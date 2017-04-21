@@ -17,7 +17,7 @@ def match(data1, data2, fields1, fields2):
     pairs = linker.match(data1, data2_remapped, threshold)
     matches = []
     for pair in pairs:
-        matches.append((pair[0][0], pair[0][1]))
+        matches.append((pair[0][0], pair[0][1], pair[1]))
     return matches
 
 def remap(data, fields_new, fields_old):

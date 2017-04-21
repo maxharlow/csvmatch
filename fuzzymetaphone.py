@@ -15,5 +15,5 @@ def match(data1, data2, fields1, fields2):
                     data1values.get(field1)[1] == data2values.get(field2)[1] != ''
                 ]
                 if True not in possibilities: match = False
-            if match: matches.append((data1key, data2key))
+            if match: matches.append((data1key, data2key, 1))
     return matches
