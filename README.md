@@ -98,7 +98,7 @@ CSV Match also supports fuzzy matching. This can be combined with any of the abo
 
 #### Bilenko
 
-The default fuzzy mode makes use of the [Dedupe library](https://github.com/datamade/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
+The default fuzzy mode makes use of the [Dedupe library](https://github.com/dedupeio/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
 
 ```bash
 $ csvmatch data1.csv data2.csv --fuzzy
