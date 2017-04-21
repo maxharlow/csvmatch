@@ -12,7 +12,7 @@ setup(
     license='Apache',
     packages=[''],
     install_requires=[
-        'chardet==2.3.0',
+        'chardet==3.0.2',
         'colorama==0.3.7',
         'unidecode==0.4.20',
         'dedupe==1.4.15',
