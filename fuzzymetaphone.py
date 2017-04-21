@@ -1,8 +1,8 @@
-import metaphone
+import doublemetaphone
 
 def match(data1, data2, fields1, fields2):
-    data1phonetic = {key: {field: metaphone.doublemetaphone(data1[key][field]) for field in data1[key]} for key in data1}
-    data2phonetic = {key: {field: metaphone.doublemetaphone(data2[key][field]) for field in data2[key]} for key in data2}
+    data1phonetic = {key: {field: doublemetaphone.doublemetaphone(data1[key][field]) for field in data1[key]} for key in data1}
+    data2phonetic = {key: {field: doublemetaphone.doublemetaphone(data2[key][field]) for field in data2[key]} for key in data2}
     matches = []
     for data1key, data1values in data1phonetic.items():
         for data2key, data2values in data2phonetic.items():
