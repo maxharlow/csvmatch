@@ -191,7 +191,7 @@ def join(name, data1, data2, fields, matches):
 
 def output(data, fields):
     output = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
-    writer = csv.writer(output)
+    writer = csv.writer(output, lineterminator='\n')
     writer.writerow([field[1] for field in fields])
     writer.writerows(data)
     return output.getvalue()
