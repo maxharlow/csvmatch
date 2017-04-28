@@ -3,7 +3,7 @@ import pip
 
 setup(
     name='csvmatch',
-    version='1.11',
+    version='1.12',
     description='Find (fuzzy) matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
