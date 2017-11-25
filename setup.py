@@ -1,5 +1,4 @@
 from setuptools import setup
-import pip
 
 setup(
     name='csvmatch',
@@ -12,10 +11,10 @@ setup(
     license='Apache',
     packages=[''],
     install_requires=[
-        'chardet==3.0.2',
-        'colorama==0.3.7',
-        'unidecode==0.4.20',
-        'dedupe==1.4.15',
+        'chardet==3.0.4',
+        'colorama==0.3.9',
+        'unidecode==0.4.21',
+        'dedupe==1.8.1',
         'jellyfish==0.5.6',
         'doublemetaphone==0.1'
     ],
@@ -33,8 +32,8 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
+        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Utilities'
     ]
