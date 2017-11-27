@@ -3,31 +3,32 @@ import dedupe
 import colorama
 
 def match(data1, data2, fields1, fields2):
-    data2_remapped = remap(data2, fields1, fields2) if fields1 != fields2 else data2
+    input1 = {i: row for i, row in enumerate(data1)}
+    input2 = {i: row for i, row in enumerate(remap(data2, fields1, fields2))}
     fields = [{'field': field, 'type': 'String'} for field in fields1]
     linker = dedupe.RecordLink(fields)
-    linker.sample(data1, data2_remapped, sample_size=1500)
+    linker.sample(input1, input2, sample_size=1500)
     while True:
         labelling(linker)
         try:
             linker.train()
             break
         except ValueError: sys.stderr.write('\nYou need to do more training.\n')
-    threshold = linker.threshold(data1, data2_remapped, recall_weight=1)
-    pairs = linker.match(data1, data2_remapped, threshold)
+    threshold = linker.threshold(input1, input2, recall_weight=1)
+    pairs = linker.match(input1, input2, threshold)
     matches = []
     for pair in pairs:
         matches.append((pair[0][0], pair[0][1], pair[1]))
     return matches
 
-def remap(data, fields_new, fields_old):
-    data_new = data.copy()
-    for key, values in data.items():
-        record_new = {}
+def remap(data, fields_new, fields_old): # converts data to use a new set of fields (dedupe insists they should be the same)
+    data_remapped = []
+    for i, row in enumerate(data):
+        item = {}
         for field_new, field_old in zip(fields_new, fields_old):
-            record_new[field_new] = values[field_old]
-        data_new[key] = record_new
-    return data_new
+            item[field_new] = row[field_old]
+        data_remapped.append(item)
+    return data_remapped
 
 def labelling(linker):
     colorama.init()

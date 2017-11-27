@@ -20,7 +20,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'csvmatch = csvmatch:main'
+            'csvmatch = cli:main'
         ]
     },
     classifiers=[
