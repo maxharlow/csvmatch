@@ -54,16 +54,16 @@ def process(data, processes):
 def process_ignore_case(data):
     return [{key: value.lower() for key, value in row.items()} for row in data]
 
-def process_filter(filename, ignore_case):
-    if filename == None: return
-    filters = [line[:-1] for line in io.open(filename)]
+def process_filter(filters, ignore_case):
+    if filters == None: return
     def filterer(data):
         regex = re.compile('(' + '|'.join(filters) + ')', re.IGNORECASE if ignore_case else 0)
         return [{key: regex.sub('', value) for key, value in row.items()} for row in data]
     return filterer
 
 def process_filter_titles(ignore_case):
-    titles = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
+    filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
+    titles = [line[:-1] for line in io.open(filename)]
     return process_filter(titles, ignore_case)
 
 def process_as_latin(data):

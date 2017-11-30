@@ -20,6 +20,7 @@ def main():
         enc2 = args.pop('enc2')
         data1 = read(file1, enc1)
         data2 = read(file2, enc2)
+        if args['filter']: args['filter'] = [line[:-1] for line in io.open(args['filter'])]
         results, keys = csvmatch.run(data1, data2, **args)
         formatted = format(results, keys)
         print(formatted)
