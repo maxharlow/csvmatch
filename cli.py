@@ -15,14 +15,9 @@ def main():
     logging.basicConfig(level=logging.WARN, format='%(message)s')
     warnings.formatwarning = lambda e, *args: str(e)
     try:
-        args = arguments()
-        file1 = args.pop('FILE1')
-        file2 = args.pop('FILE2')
-        enc1 = args.pop('enc1')
-        enc2 = args.pop('enc2')
-        data1 = read(file1, enc1)
-        data2 = read(file2, enc2)
-        if args['filter']: args['filter'] = [line[:-1] for line in io.open(args['filter'])]
+        file1, file2, args = arguments()
+        data1 = read(*file1)
+        data2 = read(*file2)
         results, keys = csvmatch.run(data1, data2, **args)
         formatted = format(results, keys)
         print(formatted)
@@ -50,7 +45,13 @@ def arguments():
     if args['FILE1'] == '-' and args['FILE2'] == '-':
         parser.print_help(sys.stderr)
         parser.exit(1)
-    return args
+    if args['filter']:
+        args['filter'] = [line[:-1] for line in io.open(args['filter'])]
+    file1 = args.pop('FILE1')
+    file2 = args.pop('FILE2')
+    enc1 = args.pop('enc1')
+    enc2 = args.pop('enc2')
+    return (file1, enc1), (file2, enc2), args
 
 def read(filename, encoding):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')
