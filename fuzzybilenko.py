@@ -2,7 +2,7 @@ import sys
 import dedupe
 import colorama
 
-def match(data1, data2, fields1, fields2):
+def match(data1, data2, fields1, fields2, threshold): # threshold not used, as is automatically calculated
     input1 = {i: row for i, row in enumerate(data1)}
     input2 = {i: row for i, row in enumerate(remap(data2, fields1, fields2))}
     fields = [{'field': field, 'type': 'String'} for field in fields1]

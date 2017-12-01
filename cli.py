@@ -40,6 +40,7 @@ def arguments():
     parser.add_argument('-j', '--join', type=str, default='inner', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is an inner join)')
     parser.add_argument('-o', '--output', nargs='+', type=str, help='fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (otherwise uses whatever fields were used for comparisions)')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='use a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', or \'metaphone\' (default is \'bilenko\')')
+    parser.add_argument('-r', '--threshold', type=float, default=0.6, help='the threshold for a fuzzy match as a number between 0 and 1 (only supported by levenshtein) (default is 0.6)')
     parser.add_argument('-v', '--version', action='version', version=__version__)
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':

@@ -17,6 +17,7 @@ def run(
         ignore_nonalpha=False,
         sort_words=False,
         algorithm=None,
+        threshold=0.6,
         output=None,
         join='inner'
     ):
@@ -30,6 +31,8 @@ def run(
         if field not in headers2: raise Exception(field + ': field not found')
     if len(fields1) != len(fields2):
         raise Exception('both files must have the same number of columns specified')
+    if threshold < 0 or threshold > 1:
+        raise Exception('threshold must be between 0.0 and 1.0')
     processes = [
         (process_ignore_case, ignore_case),
         (process_filter_titles(ignore_case), filter_titles),
@@ -40,7 +43,7 @@ def run(
     ]
     processed1 = process(data1, processes)
     processed2 = process(data2, processes)
-    matches = matcher(algorithm)(processed1, processed2, fields1, fields2)
+    matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold)
     outputs = format(output, headers1, headers2, fields1, fields2)
     results, keys = connect(join, data1, data2, outputs, matches)
     return results, keys
@@ -89,7 +92,7 @@ def matcher(algorithm):
         return fuzzymetaphone.match
     else: raise Exception(algorithm + ': algorithm does not exist')
 
-def match(data1, data2, fields1, fields2):
+def match(data1, data2, fields1, fields2, threshold):
     matches = []
     for i1, row1 in enumerate(data1):
         for i2, row2 in enumerate(data2):

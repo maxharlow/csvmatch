@@ -1,8 +1,7 @@
 import jellyfish
 import jellyfish._jellyfish as py_jellyfish
 
-def match(data1, data2, fields1, fields2):
-    threshold = 0.6
+def match(data1, data2, fields1, fields2, threshold):
     matches = []
     for i1, row1 in enumerate(data1):
         for i2, row2 in enumerate(data2):
