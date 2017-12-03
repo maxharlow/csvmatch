@@ -1,5 +1,5 @@
 from setuptools import setup
-from .cli import __version__
+from cli import __version__
 
 setup(
     name='csvmatch',

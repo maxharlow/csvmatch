@@ -3,8 +3,6 @@ CSV Match
 
 Find (fuzzy) matches between two CSV files in the terminal.
 
-Part of a set of terminal-based CSV tools, also including [CSV Pivot](https://github.com/maxharlow/csvpivot) and [CSV Bar](https://github.com/maxharlow/csvbar).
-
 Tested on Python 3.6 and 2.7.
 
 
@@ -55,6 +53,8 @@ You can also compare multiple columns, so if we wanted to find which name and lo
         --fields1 name location \
         --fields2 'Person Name' Location
 
+Note that CSV Match currently only supports uniquely-named columns. If you have a file which has multiple columns with the same name, only the values from the rightmost column will be in the output. If you have a column with the same name in both files only the values from the second will be in the output.
+
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but can be made case-insensitive with `-i`.
 
 There are also options to ignore non-alphanumeric characters (`-a`), to convert to the latin alphabet (`-n`), and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.
@@ -96,11 +96,11 @@ The more examples you give it, the better the results will be. At minimum, you s
 
 [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric, which counts the number of changes that would have to be made to transform one string into another.
 
-For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one.
+For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-t`.
 
     $ csvmatch data1.csv data2.csv --fuzzy levenshtein
 
-    name,name
+    name,Person Name
     George Smiley,George SMILEY
     Toby Esterhase,Tony Esterhase
     Peter Guillam,Peter Guillam
@@ -113,7 +113,7 @@ Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at pi
 
     $ csvmatch data1.csv data2.csv --fuzzy metaphone
 
-    name,name
+    name,Person Name
     George Smiley,George SMILEY
     Peter Guillam,Peter Guillam
     Connie Sachs,Konny Saks
