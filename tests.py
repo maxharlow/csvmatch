@@ -39,7 +39,7 @@ def test_coalesce():
     ]
     results, _ = csvmatch.run(data1, data2)
     assert results == [
-        { 'name': 'Christopher Marlowe' }
+        { 'name': 'Christopher Marlowe' } # this is not really desirable, but here we are
     ]
 
 def test_fields():
