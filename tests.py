@@ -14,7 +14,7 @@ def test_simple():
         { 'name': 'William Shakespeare', 'person': 'William Shakespeare' }
     ]
 
-def test_multiple():
+def test_fields():
     data1 = [
         { 'name': 'William Shakespeare', 'born': '1564' },
         { 'name': 'Christopher Marlowe', 'born': '1583' }
@@ -26,6 +26,25 @@ def test_multiple():
     results, _ = csvmatch.run(data1, data2)
     assert results == [
         { 'name': 'William Shakespeare', 'born': '1564', 'person': 'William Shakespeare', 'birth': '1564' }
+    ]
+
+def test_multiple():
+    data1 = [
+        { 'name': 'Anne Hathaway' },
+        { 'name': 'Anne Hathaway' },
+        { 'name': 'Christopher Marlowe' }
+    ]
+    data2 = [
+        { 'person': 'Anne Hathaway' },
+        { 'person': 'Christopher Marlowe' },
+        { 'person': 'Christopher Marlowe' }
+    ]
+    results, _ = csvmatch.run(data1, data2)
+    assert results == [
+        { 'name': 'Anne Hathaway', 'person': 'Anne Hathaway' },
+        { 'name': 'Anne Hathaway', 'person': 'Anne Hathaway' },
+        { 'name': 'Christopher Marlowe', 'person': 'Christopher Marlowe' },
+        { 'name': 'Christopher Marlowe', 'person': 'Christopher Marlowe' }
     ]
 
 def test_coalesce():
