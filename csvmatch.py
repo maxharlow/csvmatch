@@ -87,6 +87,9 @@ def matcher(algorithm):
     elif algorithm == 'levenshtein':
         import fuzzylevenshtein
         return fuzzylevenshtein.match
+    elif algorithm == 'jaro':
+        import fuzzyjaro
+        return fuzzyjaro.match
     elif algorithm == 'metaphone':
         import fuzzymetaphone
         return fuzzymetaphone.match

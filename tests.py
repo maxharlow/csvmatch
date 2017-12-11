@@ -175,6 +175,21 @@ def test_fuzzy_levenshtein():
         { 'name': 'Anne Hathaway', 'person': 'Ann Athawei' }
     ]
 
+def test_fuzzy_jaro():
+    data1 = [
+        { 'name': 'William Shakespeare' },
+        { 'name': 'Christopher Marlowe' }
+    ]
+    data2 = [
+        { 'person': 'Chris Barlow' },
+        { 'person': 'Willy Shake-Spear' }
+    ]
+    results, _ = csvmatch.run(data1, data2, algorithm='jaro')
+    assert results == [
+        { 'name': 'William Shakespeare', 'person': 'Willy Shake-Spear' },
+        { 'name': 'Christopher Marlowe', 'person': 'Chris Barlow' }
+    ]
+
 def test_fuzzy_metaphone():
     data1 = [
         { 'name': 'William Shakespeare' },

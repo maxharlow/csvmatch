@@ -94,7 +94,7 @@ The more examples you give it, the better the results will be. At minimum, you s
 
 #### Levenshtein
 
-[Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric, which counts the number of changes that would have to be made to transform one string into another.
+[Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric which counts the number of changes that would have to be made to transform one string into another.
 
 For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-t`.
 
@@ -106,6 +106,22 @@ For two strings to be considered a match, we require 60% of the longer string to
     Peter Guillam,Peter Guillam
 
 Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at picking up typos and other small differences in spelling.
+
+### Jaro
+
+[Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) is a string distance metric which counts the number of transpositions that would be required to transform one string into another. It tends to work better than Levenshtein for shorter strings of text.
+
+    $ csvmatch data1.csv data2.csv --fuzzy jaro
+
+    name,Person Name
+    George Smiley,George SMILEY
+    Percy Alléline,Peter Guillam
+    Percy Alléline,Sam Collins
+    Toby Esterhase,Tony Esterhase
+    Peter Guíllam,Peter Guillam
+    Connie Sachs,Konny Saks
+
+Here we can see a couple of incorrect matches for Percy Alléline, but Connie Sachs has matched.
 
 #### Metaphone
 
