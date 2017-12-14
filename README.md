@@ -53,8 +53,6 @@ You can also compare multiple columns, so if we wanted to find which name and lo
         --fields1 name location \
         --fields2 'Person Name' Location
 
-Note that CSV Match currently only supports uniquely-named columns. If you have a file which has multiple columns with the same name, only the values from the rightmost column will be in the output. If you have a column with the same name in both files only the values from the second will be in the output.
-
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but can be made case-insensitive with `-i`.
 
 There are also options to ignore non-alphanumeric characters (`-a`), to convert to the latin alphabet (`-n`), and to sort words (`-s`) before comparisons. Specific terms can also be filtered out before comparisons by passing a text file and the `-l` argument. A predefined list of common English name prefixes (Mr, Ms, etc) can be used with `-t`.

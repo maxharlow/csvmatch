@@ -16,9 +16,9 @@ def main():
     warnings.formatwarning = lambda e, *args: str(e)
     try:
         file1, file2, args = arguments()
-        data1 = read(*file1)
-        data2 = read(*file2)
-        results, keys = csvmatch.run(data1, data2, **args)
+        data1, headers1 = read(*file1)
+        data2, headers2 = read(*file2)
+        results, keys = csvmatch.run(data1, headers1, data2, headers2, **args)
         formatted = format(results, keys)
         print(formatted)
     except BaseException as e: sys.exit(e)
@@ -64,12 +64,13 @@ def read(filename, encoding):
         sys.stderr.write(filename + ': autodetected character encoding as ' + encoding + '\n')
     text_decoded = text.decode(encoding)
     reader_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
-    reader = csv.DictReader(reader_io)
-    data = [{key: value if sys.version_info >= (3, 0) else value.decode('utf8') for key, value in row.items()} for row in list(reader)]
-    return data
+    reader = csv.reader(reader_io)
+    headers = next(reader)
+    data = [[value if sys.version_info >= (3, 0) else value.decode('utf8') for value in row] for row in reader]
+    return data, headers
 
 def format(results, keys):
-    lines = [[value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row.values()] for row in results]
+    lines = [[value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row] for row in results]
     writer_io = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
     writer = csv.writer(writer_io, lineterminator='\n') # can't use dictwriter as headers are printed even when there's no results
     writer.writerow(keys)

@@ -3,8 +3,8 @@ import dedupe
 import colorama
 
 def match(data1, data2, fields1, fields2, threshold): # threshold not used, as is automatically calculated
-    input1 = {i: row for i, row in enumerate(data1)}
-    input2 = {i: row for i, row in enumerate(remap(data2, fields1, fields2))}
+    input1 = {i: {fields1[j]: value for j, value in enumerate(row)} for i, row in enumerate(data1)}
+    input2 = {i: {fields1[j]: value for j, value in enumerate(row)} for i, row in enumerate(data2)}
     fields = [{'field': field, 'type': 'String'} for field in fields1]
     linker = dedupe.RecordLink(fields)
     linker.sample(input1, input2, sample_size=1500)
@@ -20,15 +20,6 @@ def match(data1, data2, fields1, fields2, threshold): # threshold not used, as i
     for pair in pairs:
         matches.append((pair[0][0], pair[0][1], pair[1]))
     return matches
-
-def remap(data, fields_new, fields_old): # converts data to use a new set of fields (dedupe insists they should be the same)
-    data_remapped = []
-    for i, row in enumerate(data):
-        item = {}
-        for field_new, field_old in zip(fields_new, fields_old):
-            item[field_new] = row[field_old]
-        data_remapped.append(item)
-    return data_remapped
 
 def labelling(linker):
     colorama.init()

@@ -6,9 +6,9 @@ def match(data1, data2, fields1, fields2, threshold):
     for i1, row1 in enumerate(data1):
         for i2, row2 in enumerate(data2):
             match = False
-            for field1, field2 in zip(fields1, fields2):
-                maximum = float(max(len(row1[field1]), len(row2[field2])))
-                distance = damerau_levenshtein_distance(row1[field1], row2[field2])
+            for value1, value2 in zip(row1, row2):
+                maximum = float(max(len(value1), len(value2)))
+                distance = damerau_levenshtein_distance(value1, value2)
                 degree = 1 - distance / maximum
                 if degree > threshold: match = True
             if match: matches.append((i1, i2, degree))

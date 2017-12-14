@@ -7,7 +7,9 @@ import unidecode
 
 def run(
         data1,
+        headers1,
         data2,
+        headers2,
         fields1=None,
         fields2=None,
         ignore_case=False,
@@ -21,8 +23,6 @@ def run(
         output=None,
         join='inner'
     ):
-    headers1 = data1[0].keys()
-    headers2 = data2[0].keys()
     fields1 = fields1 if fields1 else headers1
     fields2 = fields2 if fields2 else headers2
     for field in fields1:
@@ -33,6 +33,8 @@ def run(
         raise Exception('both files must have the same number of columns specified')
     if threshold < 0 or threshold > 1:
         raise Exception('threshold must be between 0.0 and 1.0')
+    extracted1 = extract(data1, headers1, fields1)
+    extracted2 = extract(data2, headers2, fields2)
     processes = [
         (process_ignore_case, ignore_case),
         (process_filter_titles(ignore_case), filter_titles),
@@ -41,12 +43,16 @@ def run(
         (process_ignore_nonalpha, ignore_nonalpha),
         (process_sort_words, sort_words)
     ]
-    processed1 = process(data1, processes)
-    processed2 = process(data2, processes)
+    processed1 = process(extracted1, processes)
+    processed2 = process(extracted2, processes)
     matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold)
     outputs = format(output, headers1, headers2, fields1, fields2)
-    results, keys = connect(join, data1, data2, outputs, matches)
+    results, keys = connect(join, data1, headers1, data2, headers2, matches, outputs)
     return results, keys
+
+def extract(data, headers, fields):
+    fields_indexes = [headers.index(field) for field in fields]
+    return [[data[i][j] for j in fields_indexes] for i, row in enumerate(data)]
 
 def process(data, processes):
     processed = list(data) # a copy
@@ -55,13 +61,13 @@ def process(data, processes):
     return processed
 
 def process_ignore_case(data):
-    return [{key: value.lower() for key, value in row.items()} for row in data]
+    return [[value.lower() for value in row] for row in data]
 
 def process_filter(filters, ignore_case):
     if filters == None: return
     def filterer(data):
         regex = re.compile('(' + '|'.join(filters) + ')', re.IGNORECASE if ignore_case else 0)
-        return [{key: regex.sub('', value) for key, value in row.items()} for row in data]
+        return [[regex.sub('', value) for value in row] for row in data]
     return filterer
 
 def process_filter_titles(ignore_case):
@@ -70,14 +76,14 @@ def process_filter_titles(ignore_case):
     return process_filter(titles, ignore_case)
 
 def process_as_latin(data):
-    return [{key: unidecode.unidecode(value) for key, value in row.items()} for row in data]
+    return [[unidecode.unidecode(value) for value in row] for row in data]
 
 def process_ignore_nonalpha(data):
     regex = re.compile('[^A-Za-z0-9 ]') # does not take into account non-latin alphabet
-    return [{key: regex.sub('', value) for key, value in row.items()} for row in data]
+    return [[regex.sub('', value) for value in row] for row in data]
 
 def process_sort_words(data):
-    return [{key: ' '.join(sorted(value.split(' '))) for key, value in row.items()} for row in data]
+    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
 
 def matcher(algorithm):
     if algorithm == None: return match
@@ -99,14 +105,16 @@ def match(data1, data2, fields1, fields2, threshold):
     matches = []
     for i1, row1 in enumerate(data1):
         for i2, row2 in enumerate(data2):
-            match = True
-            for field1, field2 in zip(fields1, fields2):
-                if row1[field1] != row2[field2]: match = False
-            if match: matches.append((i1, i2, 1))
+            if row1 == row2: matches.append((i1, i2, 1))
     return matches
 
 def format(output, headers1, headers2, fields1, fields2):
-    if output == None: return [('1', key) for key in fields1] + [('2', key) for key in fields2]
+    if len(headers1) != len(set(headers1)):
+        raise Exception('first file has duplicate headers')
+    if len(headers2) != len(set(headers2)):
+        raise Exception('second file has duplicate headers')
+    if output == None: # note that output defaults to fields, not headers
+        return [('1', key) for key in fields1] + [('2', key) for key in fields2]
     outputs = []
     for definition in output:
         if re.match('^[1|2]\..*', definition): # standard header definitions
@@ -123,36 +131,51 @@ def format(output, headers1, headers2, fields1, fields2):
         else: raise Exception('output format must be the file number, followed by a dot, followed by the name of the column')
     return outputs
 
-def connect(join, data1, data2, outputs, matches):
+def connect(join, data1, headers1, data2, headers2, matches, outputs):
     if join.lower() not in ['inner', 'left-outer', 'right-outer', 'full-outer']:
         raise Exception(join + ': join type not known')
     results = []
     for match in matches:
-        row = {}
+        row = []
         for number, key in outputs:
-            if   number == '1': row[key] = data1[match[0]][key]
-            elif number == '2': row[key] = data2[match[1]][key]
-            elif number == '-': row[key] = str(match[2])
+            if number == '1':
+                y = match[0]
+                x = headers1.index(key)
+                row.append(data1[y][x])
+            elif number == '2':
+                y = match[1]
+                x = headers2.index(key)
+                row.append(data2[y][x])
+            elif number == '-':
+                row.append(str(match[2]))
         results.append(row)
     if join.lower() == 'full-outer' or join.lower() == 'left-outer':
         matches1 = [match[0] for match in matches]
         for i, row1 in enumerate(data1):
-            if i not in matches1:
-                row = {}
-                for number, key in outputs:
-                    if   number == '1': row[key] = row1[key]
-                    elif number == '2': row[key] = ''
-                    elif number == '-': row[key] = ''
-                results.append(row)
+            if i in matches1: continue
+            row = []
+            for number, key in outputs:
+                if number == '1':
+                    x = headers1.index(key)
+                    row.append(row1[x])
+                elif number == '2':
+                    row.append('')
+                elif number == '-':
+                    row.append('')
+            results.append(row)
     if join.lower() == 'full-outer' or join.lower() == 'right-outer':
         matches2 = [match[1] for match in matches]
         for i, row2 in enumerate(data2):
-            if i not in matches2:
-                row = {}
-                for number, key in outputs:
-                    if   number == '1': row[key] = ''
-                    elif number == '2': row[key] = row2[key]
-                    elif number == '-': row[key] = ''
-                results.append(row)
+            if i in matches2: continue
+            row = []
+            for number, key in outputs:
+                if number == '1':
+                    row.append('')
+                elif number == '2':
+                    x = headers2.index(key)
+                    row.append(row2[x])
+                elif number == '-':
+                    row.append('')
+            results.append(row)
     keys = [key for _, key in outputs]
     return results, keys

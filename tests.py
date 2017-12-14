@@ -1,265 +1,336 @@
 import csvmatch
 
 def test_simple():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'William Shakespeare' }
+        ['Anne Hathaway'],
+        ['William Shakespeare']
     ]
-    results, _ = csvmatch.run(data1, data2)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare' }
+        ['William Shakespeare', 'William Shakespeare']
     ]
 
 def test_fields():
+    headers1 = ['name', 'born']
     data1 = [
-        { 'name': 'William Shakespeare', 'born': '1564' },
-        { 'name': 'Christopher Marlowe', 'born': '1583' }
+        ['William Shakespeare', '1564'],
+        ['Christopher Marlowe', '1583']
     ]
+    headers2 = ['person', 'birth']
     data2 = [
-        { 'person': 'Christopher Marlowe', 'birth': 'unknown' },
-        { 'person': 'William Shakespeare', 'birth': '1564' }
+        ['Christopher Marlowe', 'unknown'],
+        ['William Shakespeare', '1564']
     ]
-    results, _ = csvmatch.run(data1, data2)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2)
+    assert keys == ['name', 'born', 'person', 'birth']
     assert results == [
-        { 'name': 'William Shakespeare', 'born': '1564', 'person': 'William Shakespeare', 'birth': '1564' }
+        ['William Shakespeare', '1564', 'William Shakespeare', '1564']
     ]
 
 def test_multiple():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'Anne Hathaway' },
-        { 'name': 'Anne Hathaway' },
-        { 'name': 'Christopher Marlowe' }
+        ['Anne Hathaway'],
+        ['Anne Hathaway'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'Christopher Marlowe' },
-        { 'person': 'Christopher Marlowe' }
+        ['Anne Hathaway'],
+        ['Christopher Marlowe'],
+        ['Christopher Marlowe']
     ]
-    results, _ = csvmatch.run(data1, data2)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'Anne Hathaway', 'person': 'Anne Hathaway' },
-        { 'name': 'Anne Hathaway', 'person': 'Anne Hathaway' },
-        { 'name': 'Christopher Marlowe', 'person': 'Christopher Marlowe' },
-        { 'name': 'Christopher Marlowe', 'person': 'Christopher Marlowe' }
+        ['Anne Hathaway', 'Anne Hathaway'],
+        ['Anne Hathaway', 'Anne Hathaway'],
+        ['Christopher Marlowe', 'Christopher Marlowe'],
+        ['Christopher Marlowe', 'Christopher Marlowe']
     ]
 
-def test_coalesce():
+def test_same_headers():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'Anne Hathaway' },
-        { 'name': 'Christopher Marlowe' }
+        ['Anne Hathaway'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['name']
     data2 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
-    results, _ = csvmatch.run(data1, data2)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2)
+    assert keys == ['name', 'name']
     assert results == [
-        { 'name': 'Christopher Marlowe' } # this is not really desirable, but here we are
+        ['Christopher Marlowe', 'Christopher Marlowe']
     ]
 
 def test_fields():
+    headers1 = ['name', 'born']
     data1 = [
-        { 'name': 'William Shakespeare', 'born': '1564' },
-        { 'name': 'Christopher Marlowe', 'born': '1564' }
+        ['William Shakespeare', '1564'],
+        ['Christopher Marlowe', '1564']
     ]
+    headers2 = ['person', 'hometown']
     data2 = [
-        { 'person': 'William Shakespeare', 'hometown': 'Stratford-upon-Avon' },
-        { 'person': 'Anne Hathaway', 'hometown': 'Stratford-upon-Avon' }
+        ['William Shakespeare', 'Stratford-upon-Avon'],
+        ['Anne Hathaway', 'Stratford-upon-Avon']
     ]
-    results, _ = csvmatch.run(data1, data2, fields1=['name'], fields2=['person'])
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name'], fields2=['person'])
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare' }
+        ['William Shakespeare', 'William Shakespeare']
+    ]
+
+def test_ordering():
+    headers1 = ['name', 'born']
+    data1 = [
+        ['William Shakespeare', '1564'],
+        ['Christopher Marlowe', '1564']
+    ]
+    headers2 = ['birth', 'person']
+    data2 = [
+        ['1564', 'William Shakespeare'],
+        ['1556', 'Anne Hathaway']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name', 'born'], fields2=['person', 'birth'])
+    assert keys == ['name', 'born', 'person', 'birth']
+    assert results == [
+        ['William Shakespeare', '1564', 'William Shakespeare', '1564']
     ]
 
 def test_ignore_case():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'Anne Hathaway' },
-        { 'name': 'Christopher Marlowe' }
+        ['Anne Hathaway'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'william shakespeare' },
-        { 'person': 'christopher marlowe' }
+        ['william shakespeare'],
+        ['christopher marlowe']
     ]
-    results, _ = csvmatch.run(data1, data2, ignore_case=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_case=True)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'Christopher Marlowe', 'person': 'christopher marlowe' }
+        ['Christopher Marlowe', 'christopher marlowe']
     ]
 
 def test_filter():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'ONE Anne Hathaway' },
-        { 'name': 'TWO Christopher Marlowe' }
+        ['ONE Anne Hathaway'],
+        ['TWO Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'THREE Christopher Marlowe' },
-        { 'person': 'FOUR William Shakespeare' }
+        ['THREE Christopher Marlowe'],
+        ['FOUR William Shakespeare']
     ]
-    results, _ = csvmatch.run(data1, data2, filter=['ONE', 'TWO', 'THREE', 'FOUR'])
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, filter=['ONE', 'TWO', 'THREE', 'FOUR'])
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'TWO Christopher Marlowe', 'person': 'THREE Christopher Marlowe' }
+        ['TWO Christopher Marlowe', 'THREE Christopher Marlowe']
     ]
 
 def test_filter_titles():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'Ms. Anne Hathaway' },
-        { 'name': 'Mr. William Shakespeare' }
+        ['Ms. Anne Hathaway'],
+        ['Mr. William Shakespeare']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Mr. Christopher Marlowe' },
-        { 'person': 'Mrs. Anne Hathaway' }
+        ['Mr. Christopher Marlowe'],
+        ['Mrs. Anne Hathaway']
     ]
-    results, _ = csvmatch.run(data1, data2, filter_titles=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, filter_titles=True)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'Ms. Anne Hathaway', 'person': 'Mrs. Anne Hathaway' }
+        ['Ms. Anne Hathaway', 'Mrs. Anne Hathaway']
     ]
 
 def test_as_latin():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'Charlotte Brontë' },
-        { 'name': 'Gabriel García Márquez' }
+        ['Charlotte Brontë'],
+        ['Gabriel García Márquez']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Gabriel Garcia Marquez' },
-        { 'person': 'Leo Tolstoy' }
+        ['Gabriel Garcia Marquez'],
+        ['Leo Tolstoy']
     ]
-    results, _ = csvmatch.run(data1, data2, as_latin=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, as_latin=True)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'Gabriel García Márquez', 'person': 'Gabriel Garcia Marquez' }
+        ['Gabriel García Márquez', 'Gabriel Garcia Marquez']
     ]
 
 def test_ignore_nonalpha():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway!' },
-        { 'person': 'William Shakespeare.' }
+        ['Anne Hathaway!'],
+        ['William Shakespeare.']
     ]
-    results, _ = csvmatch.run(data1, data2, ignore_nonalpha=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonalpha=True)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare.' }
+        ['William Shakespeare', 'William Shakespeare.']
     ]
 
 def test_sort_words():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Anne Hathaway' }
+        ['William Shakespeare'],
+        ['Anne Hathaway']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'Shakespeare William' }
+        ['Anne Hathaway'],
+        ['Shakespeare William']
     ]
-    results, _ = csvmatch.run(data1, data2, sort_words=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, sort_words=True)
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'Shakespeare William' },
-        { 'name': 'Anne Hathaway', 'person': 'Anne Hathaway' }
+        ['William Shakespeare', 'Shakespeare William'],
+        ['Anne Hathaway', 'Anne Hathaway']
     ]
 
 def test_fuzzy_levenshtein():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Anne Hathaway' }
+        ['William Shakespeare'],
+        ['Anne Hathaway']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Ann Athawei' },
-        { 'person': 'Will Sheikhspere' }
+        ['Ann Athawei'],
+        ['Will Sheikhspere']
     ]
-    results, _ = csvmatch.run(data1, data2, algorithm='levenshtein')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='levenshtein')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'Will Sheikhspere' },
-        { 'name': 'Anne Hathaway', 'person': 'Ann Athawei' }
+        ['William Shakespeare', 'Will Sheikhspere'],
+        ['Anne Hathaway', 'Ann Athawei']
     ]
 
 def test_fuzzy_jaro():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Chris Barlow' },
-        { 'person': 'Willy Shake-Spear' }
+        ['Chris Barlow'],
+        ['Willy Shake-Spear']
     ]
-    results, _ = csvmatch.run(data1, data2, algorithm='jaro')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='jaro')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'Willy Shake-Spear' },
-        { 'name': 'Christopher Marlowe', 'person': 'Chris Barlow' }
+        ['William Shakespeare', 'Willy Shake-Spear'],
+        ['Christopher Marlowe', 'Chris Barlow']
     ]
 
 def test_fuzzy_metaphone():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Anne Hathaway' }
+        ['William Shakespeare'],
+        ['Anne Hathaway']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Ann Athawei' },
-        { 'person': 'Will Sheikhspere' }
+        ['Ann Athawei'],
+        ['Will Sheikhspere']
     ]
-    results, _ = csvmatch.run(data1, data2, algorithm='metaphone')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='metaphone')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'Anne Hathaway', 'person': 'Ann Athawei' }
+        ['Anne Hathaway', 'Ann Athawei']
     ]
 
 def test_output():
+    headers1 = ['name', 'born']
     data1 = [
-        { 'name': 'William Shakespeare', 'born': '1564' },
-        { 'name': 'Christopher Marlowe', 'born': '1583' }
+        ['William Shakespeare', '1564'],
+        ['Christopher Marlowe', '1583']
     ]
+    headers2 = ['person', 'died']
     data2 = [
-        { 'person': 'Anne Hathaway', 'died': '1623' },
-        { 'person': 'William Shakespeare', 'died': '1616' }
+        ['Anne Hathaway', '1623'],
+        ['William Shakespeare', '1616']
     ]
-    results, _ = csvmatch.run(data1, data2, fields1=['name'], fields2=['person'], output=['1*', '2.died', 'degree'])
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name'], fields2=['person'], output=['1*', '2.died', 'degree'])
+    assert keys == ['name', 'born', 'died', 'degree']
     assert results == [
-        { 'name': 'William Shakespeare', 'born': '1564', 'died': '1616', 'degree': '1' }
+        ['William Shakespeare', '1564', '1616', '1']
     ]
 
 def test_join_left_outer():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'William Shakespeare' }
+        ['Anne Hathaway'],
+        ['William Shakespeare']
     ]
-    results, _ = csvmatch.run(data1, data2, join='left-outer')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, join='left-outer')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe', 'person': '' }
+        ['William Shakespeare', 'William Shakespeare'],
+        ['Christopher Marlowe', '']
     ]
 
 def test_join_right_outer():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'William Shakespeare' }
+        ['Anne Hathaway'],
+        ['William Shakespeare']
     ]
-    results, _ = csvmatch.run(data1, data2, join='right-outer')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, join='right-outer')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare' },
-        { 'name': '', 'person': 'Anne Hathaway' }
+        ['William Shakespeare', 'William Shakespeare'],
+        ['', 'Anne Hathaway']
     ]
 
 def test_join_full_outer():
+    headers1 = ['name']
     data1 = [
-        { 'name': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe' }
+        ['William Shakespeare'],
+        ['Christopher Marlowe']
     ]
+    headers2 = ['person']
     data2 = [
-        { 'person': 'Anne Hathaway' },
-        { 'person': 'William Shakespeare' }
+        ['Anne Hathaway'],
+        ['William Shakespeare']
     ]
-    results, _ = csvmatch.run(data1, data2, join='full-outer')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, join='full-outer')
+    assert keys == ['name', 'person']
     assert results == [
-        { 'name': 'William Shakespeare', 'person': 'William Shakespeare' },
-        { 'name': 'Christopher Marlowe', 'person': '' },
-        { 'name': '', 'person': 'Anne Hathaway' }
+        ['William Shakespeare', 'William Shakespeare'],
+        ['Christopher Marlowe', ''],
+        ['', 'Anne Hathaway']
     ]
