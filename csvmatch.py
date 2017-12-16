@@ -47,12 +47,13 @@ def run(
     processed2 = process(extracted2, processes)
     matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold)
     outputs = format(output, headers1, headers2, fields1, fields2)
-    results, keys = connect(join, data1, headers1, data2, headers2, matches, outputs)
+    results = connect(join, data1, headers1, data2, headers2, matches, outputs)
+    keys = [key for _, key in outputs]
     return results, keys
 
 def extract(data, headers, fields):
-    fields_indexes = [headers.index(field) for field in fields]
-    return [[data[i][j] for j in fields_indexes] for i, row in enumerate(data)]
+    indexes = [headers.index(field) for field in fields]
+    return [[row[i] for i in indexes] for row in data]
 
 def process(data, processes):
     processed = list(data) # a copy
@@ -177,5 +178,4 @@ def connect(join, data1, headers1, data2, headers2, matches, outputs):
                 elif number == '-':
                     row.append('')
             results.append(row)
-    keys = [key for _, key in outputs]
-    return results, keys
+    return results
