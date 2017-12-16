@@ -210,6 +210,24 @@ def test_sort_words():
         ['Anne Hathaway', 'Anne Hathaway']
     ]
 
+def test_multiprocess():
+    headers1 = ['name']
+    data1 = [
+        ['William Shakespeare'],
+        ['Charlotte Brontë']
+    ]
+    headers2 = ['person']
+    data2 = [
+        ['BRONTE, CHARLOTTE'],
+        ['SHAKESPEARE, WILLIAM']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_case=True, as_latin=True, ignore_nonalpha=True, sort_words=True)
+    assert keys == ['name', 'person']
+    assert results == [
+        ['William Shakespeare', 'SHAKESPEARE, WILLIAM'],
+        ['Charlotte Brontë', 'BRONTE, CHARLOTTE']
+    ]
+
 def test_fuzzy_levenshtein():
     headers1 = ['name']
     data1 = [
