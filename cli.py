@@ -8,7 +8,7 @@ import argparse
 import chardet
 import csvmatch
 
-__version__ = '1.13'
+__version__ = '1.14'
 
 def main():
     logging.captureWarnings(True)
