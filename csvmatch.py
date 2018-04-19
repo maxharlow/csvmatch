@@ -21,7 +21,8 @@ def run(
         algorithm=None,
         threshold=0.6,
         output=None,
-        join='inner'
+        join='inner',
+        ticker=None
     ):
     fields1 = fields1 if fields1 else headers1
     fields2 = fields2 if fields2 else headers2
@@ -45,7 +46,8 @@ def run(
     ]
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
-    matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold)
+    tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and algorithm is not 'bilenko' else None
+    matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold, tick)
     outputs = format(output, headers1, headers2, fields1, fields2)
     results = connect(join, data1, headers1, data2, headers2, matches, outputs)
     keys = [key for _, key in outputs]
@@ -102,11 +104,12 @@ def matcher(algorithm):
         return fuzzymetaphone.match
     else: raise Exception(algorithm + ': algorithm does not exist')
 
-def match(data1, data2, fields1, fields2, threshold):
+def match(data1, data2, fields1, fields2, threshold, tick):
     matches = []
     for i1, row1 in enumerate(data1):
         for i2, row2 in enumerate(data2):
             if row1 == row2: matches.append((i1, i2, 1))
+            if tick: tick()
     return matches
 
 def format(output, headers1, headers2, fields1, fields2):

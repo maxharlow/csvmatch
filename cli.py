@@ -6,6 +6,7 @@ import logging
 import warnings
 import argparse
 import chardet
+import tqdm
 import csvmatch
 
 __version__ = '1.14'
@@ -14,11 +15,12 @@ def main():
     logging.captureWarnings(True)
     logging.basicConfig(level=logging.WARN, format='%(message)s')
     warnings.formatwarning = lambda e, *args: str(e)
+    sys.stderr.write('Starting up...\n')
     try:
         file1, file2, args = arguments()
         data1, headers1 = read(*file1)
         data2, headers2 = read(*file2)
-        results, keys = csvmatch.run(data1, headers1, data2, headers2, **args)
+        results, keys = csvmatch.run(data1, headers1, data2, headers2, ticker=ticker, **args)
         formatted = format(results, keys)
         print(formatted)
     except BaseException as e: sys.exit(e)
@@ -53,6 +55,10 @@ def arguments():
     enc1 = args.pop('enc1')
     enc2 = args.pop('enc2')
     return (file1, enc1), (file2, enc2), args
+
+def ticker(text, total):
+    progress = tqdm.tqdm(bar_format=text + ' |{bar}| {percentage:3.0f}% / {remaining} left', total=total)
+    return progress.update
 
 def read(filename, encoding):
     if not os.path.isfile(filename) and filename != '-': raise Exception(filename + ': no such file')

@@ -1,6 +1,6 @@
 import doublemetaphone
 
-def match(data1, data2, fields1, fields2, threshold): # threshold is unused
+def match(data1, data2, fields1, fields2, threshold, tick): # threshold is unused
     phonetic1 = [[doublemetaphone.doublemetaphone(value) for value in row] for row in data1]
     phonetic2 = [[doublemetaphone.doublemetaphone(value) for value in row] for row in data2]
     matches = []
@@ -15,5 +15,6 @@ def match(data1, data2, fields1, fields2, threshold): # threshold is unused
                     metaphone1[1] == metaphone2[1] != ''
                 ]
                 if True not in possibilities: match = False
+                if tick: tick()
             if match: matches.append((i1, i2, 1))
     return matches
