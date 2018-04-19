@@ -5,6 +5,8 @@ Find (fuzzy) matches between two CSV files in the terminal.
 
 Tested on Python 3.6 and 2.7.
 
+[There's a tutorial on how CSV Match can be used for investigative journalism here.](https://github.com/maxharlow/tutorials/tree/master/find-connections-with-fuzzy-matching)
+
 
 Installing
 ----------
