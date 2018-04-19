@@ -60,7 +60,7 @@ def read(filename, encoding):
     text = file.read()
     if text == '': raise Exception(filename + ': file is empty')
     if not encoding:
-        encoding = chardet.detect(text)['encoding'] # can't always be relied upon
+        encoding = chardet.detect(text[:100000])['encoding'] # can't always be relied upon
         sys.stderr.write(filename + ': autodetected character encoding as ' + encoding + '\n')
     text_decoded = text.decode(encoding)
     reader_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
