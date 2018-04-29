@@ -13,7 +13,7 @@ Installing
 
     pip install csvmatch
 
-Get an error saying 'command not found'? Sometimes `pip` has a different name -- try typing `pip3` or `pip2` instead. If you get an error saying 'permission denied', try prepending `sudo` to the start.
+Get an error saying 'command not found'? Sometimes `pip` has a different name -- try typing `pip3` or `pip2` instead. If you get an error saying 'permission denied', try prepending `sudo`.
 
 Usage
 -----
