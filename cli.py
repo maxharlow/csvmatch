@@ -67,13 +67,15 @@ def read(filename, encoding):
     if text == '': raise Exception(filename + ': file is empty')
     if not encoding:
         encoding = chardet.detect(text[:100000])['encoding'] # can't always be relied upon
-        sys.stderr.write(filename + ': autodetected character encoding as ' + encoding + '\n')
+        sys.stderr.write(filename + ': autodetected character encoding as ' + encoding.upper() + '\n')
     text_decoded = text.decode(encoding)
-    reader_io = io.StringIO(text_decoded) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8'))
+    reader_io = io.StringIO(text_decoded, newline=None) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8').replace('\r\n', '\n'))
     reader = csv.reader(reader_io)
-    headers = next(reader)
-    data = [[value if sys.version_info >= (3, 0) else value.decode('utf8') for value in row] for row in reader]
-    return data, headers
+    try:
+        headers = next(reader)
+        data = [[value if sys.version_info >= (3, 0) else value.decode('utf8') for value in row] for row in reader]
+        return data, headers
+    except csv.Error as e: raise Exception(filename + ': could not read file -- try specifying the encoding')
 
 def format(results, keys):
     lines = [[value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row] for row in results]
