@@ -41,7 +41,7 @@ def arguments():
     parser.add_argument('-n', '--as-latin', action='store_true', help='convert to latin alphabet when comparing')
     parser.add_argument('-s', '--sort-words', action='store_true', help='sort words alphabetically when comparing')
     parser.add_argument('-j', '--join', type=str, default='inner', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is inner)')
-    parser.add_argument('-o', '--output', nargs='+', type=str, help='space-separated list of fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (default is the field lists if specified, otherwise all columns)')
+    parser.add_argument('-o', '--output', nargs='+', type=str, help='space-separated list of fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (default is the field lists if specified, otherwise all columns). Where a fuzzy matching algorithm has been used \'degree\' will add a column with a number between 0 - 1 indicating the strength of each match.')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='perform a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', \'jaro\', or \'metaphone\' (default is bilenko)')
     parser.add_argument('-r', '--threshold', type=float, default=0.6, help='the threshold for a fuzzy match as a number between 0 and 1 (default is 0.6)')
     args = vars(parser.parse_args())
