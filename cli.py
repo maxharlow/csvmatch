@@ -66,16 +66,23 @@ def read(filename, encoding):
     text = file.read()
     if text == '': raise Exception(filename + ': file is empty')
     if not encoding:
-        encoding = chardet.detect(text[:100000])['encoding'] # can't always be relied upon
+        detector = chardet.universaldetector.UniversalDetector()
+        text_lines = text.split(b'\n')
+        for i in range(0, len(text_lines)):
+            detector.feed(text_lines[i])
+            if detector.done: break
+        detector.close()
+        encoding = detector.result['encoding'] # can't always be relied upon
         sys.stderr.write(filename + ': autodetected character encoding as ' + encoding.upper() + '\n')
-    text_decoded = text.decode(encoding)
-    reader_io = io.StringIO(text_decoded, newline=None) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8').replace('\r\n', '\n'))
-    reader = csv.reader(reader_io)
     try:
+        text_decoded = text.decode(encoding)
+        reader_io = io.StringIO(text_decoded, newline=None) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8').replace('\r\n', '\n'))
+        reader = csv.reader(reader_io)
         headers = next(reader)
         data = [[value if sys.version_info >= (3, 0) else value.decode('utf8') for value in row] for row in reader]
         return data, headers
-    except csv.Error as e: raise Exception(filename + ': could not read file -- try specifying the encoding')
+    except UnicodeDecodeError as e: raise Exception(filename + ': could not read file -- try specifying the encoding')
+    except csv.Error as e: raise Exception(filename + ': could not read file as a CSV')
 
 def format(results, keys):
     lines = [[value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row] for row in results]
