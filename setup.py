@@ -34,7 +34,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 2.7',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Utilities'
