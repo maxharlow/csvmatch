@@ -138,6 +138,26 @@ Here we can see a couple of incorrect matches for Percy Alléline, but Connie Sa
 This shows a match for Connie Sachs and Konny Saks, despite their very different spellings.
 
 
+Common installation problems
+----------------------------
+
+### `No module named 'numpy'`
+
+If you're on a Mac, this could mean you need to install the Xcode command line developer tools. These can be installed by:
+
+    $ xcode-select --install
+
+Then click install on the prompt that appears. After it's finished, try installing CSV Match again.
+
+### `Broken toolchain: cannot link a simple C program`
+
+If you're on a Mac, this could mean you need to accept the Xcode licence. To do this:
+
+    $ sudo xcodebuild -license accept
+
+You'll be asked for your password. After it's finished, try installing CSV Match again.
+
+
 A note on uniqueness
 --------------------
 
