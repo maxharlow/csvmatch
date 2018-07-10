@@ -9,7 +9,7 @@ import chardet
 import tqdm
 import csvmatch
 
-__version__ = '1.16'
+__version__ = '1.17'
 
 def main():
     logging.captureWarnings(True)
