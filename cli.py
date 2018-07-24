@@ -23,6 +23,7 @@ def main():
         results, keys = csvmatch.run(data1, headers1, data2, headers2, ticker=ticker, **args)
         formatted = format(results, keys)
         print(formatted)
+        sys.stdout.flush()
     except BaseException as e: sys.exit(e)
 
 def arguments():
