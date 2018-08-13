@@ -1,7 +1,6 @@
 import jellyfish
 import sys
 
-
 def match(data1, data2, fields1, fields2, threshold, tick, weightings):
     matches = []
     for i1, row1 in enumerate(data1):
@@ -10,8 +9,6 @@ def match(data1, data2, fields1, fields2, threshold, tick, weightings):
             degree = 0
             for i, (value1, value2) in enumerate(values):
                 degree += jellyfish.jaro_winkler(value1, value2) * weightings[i]
-            if degree > threshold:
-                matches.append((i1, i2, degree))
-            if tick:
-                tick()
+            if degree > threshold: matches.append((i1, i2, degree))
+            if tick: tick()
     return matches
