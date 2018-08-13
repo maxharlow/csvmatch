@@ -11,6 +11,7 @@ import csvmatch
 
 __version__ = '1.17'
 
+
 def main():
     logging.captureWarnings(True)
     logging.basicConfig(level=logging.WARN, format='%(message)s')
@@ -44,6 +45,7 @@ def arguments():
     parser.add_argument('-o', '--output', nargs='+', type=str, help='space-separated list of fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (default is the field lists if specified, otherwise all columns). Where a fuzzy matching algorithm has been used \'degree\' will add a column with a number between 0 - 1 indicating the strength of each match.')
     parser.add_argument('-f', '--fuzzy', nargs='?', type=str, const='bilenko', dest='algorithm', help='perform a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', \'jaro\', or \'metaphone\' (default is bilenko)')
     parser.add_argument('-r', '--threshold', type=float, default=0.6, help='the threshold for a fuzzy match as a number between 0 and 1 (default is 0.6)')
+    parser.add_argument('-w', '--weightings', nargs='+',type=float,help='space-separated list of weightings for fields in a fuzzy match. An equal weighting between all fields is used if no list is provided.',)
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
         parser.print_help(sys.stderr)

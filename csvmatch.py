@@ -6,24 +6,25 @@ import csv
 import unidecode
 
 def run(
-        data1,
-        headers1,
-        data2,
-        headers2,
-        fields1=None,
-        fields2=None,
-        ignore_case=False,
-        filter_titles=False,
-        filter=None,
-        as_latin=False,
-        ignore_nonalpha=False,
-        sort_words=False,
-        algorithm=None,
-        threshold=0.6,
-        output=None,
-        join='inner',
-        ticker=None
-    ):
+    data1,
+    headers1,
+    data2,
+    headers2,
+    fields1=None,
+    fields2=None,
+    ignore_case=False,
+    filter_titles=False,
+    filter=None,
+    as_latin=False,
+    ignore_nonalpha=False,
+    sort_words=False,
+    algorithm=None,
+    threshold=0.6,
+    output=None,
+    join='inner',
+    ticker=None,
+    weightings=None,
+):
     fields1 = fields1 if fields1 else headers1
     fields2 = fields2 if fields2 else headers2
     for field in fields1:
@@ -34,6 +35,9 @@ def run(
         raise Exception('both files must have the same number of columns specified')
     if threshold < 0 or threshold > 1:
         raise Exception('threshold must be between 0.0 and 1.0')
+    if weightings is None: weightings = [1 / len(fields1) for _ in range(len(fields1))]
+    if len(weightings) != len(fields1): raise Exception('list of weightings must be as long as the number of columns specified')
+    if sum(weightings) != 1.0: raise Exception('sum of weightings must equal to 1.0')
     extracted1 = extract(data1, headers1, fields1)
     extracted2 = extract(data2, headers2, fields2)
     processes = [
@@ -47,7 +51,10 @@ def run(
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
     tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and algorithm is not 'bilenko' else None
-    matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold, tick)
+    if algorithm is None:
+        matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold, tick)
+    else:
+        matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold, tick, weightings)
     outputs = format(output, headers1, headers2, fields1, fields2)
     results = connect(join, data1, headers1, data2, headers2, matches, outputs)
     keys = [key for _, key in outputs]
