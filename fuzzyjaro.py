@@ -1,5 +1,4 @@
 import jellyfish
-import sys
 
 def match(data1, data2, fields1, fields2, threshold, tick, weightings):
     matches = []
