@@ -246,6 +246,23 @@ def test_fuzzy_levenshtein():
         ['Anne Hathaway', 'Ann Athawei']
     ]
 
+def test_fuzzy_levenshtein_fields():
+    headers1 = ['name', 'address', 'born']
+    data1 = [
+        ['William Shakespeare', 'Henley Street', '1564'],
+        ['Christopher Marlowe', 'Corpus Christi', '1564']
+    ]
+    headers2 = ['birth', 'person', 'location']
+    data2 = [
+        ['1564', 'Will Sheikhspere', 'Henley Street'],
+        ['1556', 'Anne Hathaway', 'Cottage Lane']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name', 'address'], fields2=['person', 'location'], algorithm='levenshtein', output=['1.name', '1.address', '2.person', '2.location', 'degree'])
+    assert keys == ['name', 'address', 'person', 'location', 'degree']
+    assert results == [
+        ['William Shakespeare', 'Henley Street', 'Will Sheikhspere', 'Henley Street', '0.8157894736842105']
+    ]
+
 def test_fuzzy_jaro():
     headers1 = ['name']
     data1 = [
