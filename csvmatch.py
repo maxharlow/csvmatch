@@ -13,11 +13,11 @@ def run(
         fields1=None,
         fields2=None,
         ignore_case=False,
-        filter_titles=False,
-        filter=None,
-        as_latin=False,
+        ignore_titles=False,
+        ignore_custom=None,
+        ignore_nonlatin=False,
         ignore_nonalpha=False,
-        sort_words=False,
+        ignore_order_words=False,
         algorithm=None,
         threshold=0.6,
         output=None,
@@ -38,11 +38,11 @@ def run(
     extracted2 = extract(data2, headers2, fields2)
     processes = [
         (process_ignore_case, ignore_case),
-        (process_filter_titles(ignore_case), filter_titles),
-        (process_filter(filter, ignore_case), filter),
-        (process_as_latin, as_latin),
+        (process_ignore_titles(ignore_case), ignore_titles),
+        (process_ignore_custom(ignore_custom, ignore_case), ignore_custom),
+        (process_ignore_nonlatin, ignore_nonlatin),
         (process_ignore_nonalpha, ignore_nonalpha),
-        (process_sort_words, sort_words)
+        (process_ignore_order_words, ignore_order_words)
     ]
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
@@ -66,26 +66,26 @@ def process(data, processes):
 def process_ignore_case(data):
     return [[value.lower() for value in row] for row in data]
 
-def process_filter(filters, ignore_case):
+def process_ignore_custom(filters, ignore_case):
     if filters == None: return
     def filterer(data):
         regex = re.compile('(' + '|'.join(filters) + ')', re.IGNORECASE if ignore_case else 0)
         return [[regex.sub('', value) for value in row] for row in data]
     return filterer
 
-def process_filter_titles(ignore_case):
+def process_ignore_titles(ignore_case):
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
     titles = [line[:-1] for line in io.open(filename)]
-    return process_filter(titles, ignore_case)
+    return process_ignore_custom(titles, ignore_case)
 
-def process_as_latin(data):
+def process_ignore_nonlatin(data):
     return [[unidecode.unidecode(value) for value in row] for row in data]
 
 def process_ignore_nonalpha(data):
     regex = re.compile('[^A-Za-z0-9 ]') # does not take into account non-latin alphabet
     return [[regex.sub('', value) for value in row] for row in data]
 
-def process_sort_words(data):
+def process_ignore_order_words(data):
     return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
 
 def matcher(algorithm):

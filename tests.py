@@ -124,7 +124,7 @@ def test_ignore_case():
         ['Christopher Marlowe', 'christopher marlowe']
     ]
 
-def test_filter():
+def test_ignore_custom():
     headers1 = ['name']
     data1 = [
         ['ONE Anne Hathaway'],
@@ -135,13 +135,13 @@ def test_filter():
         ['THREE Christopher Marlowe'],
         ['FOUR William Shakespeare']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, filter=['ONE', 'TWO', 'THREE', 'FOUR'])
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_custom=['ONE', 'TWO', 'THREE', 'FOUR'])
     assert keys == ['name', 'person']
     assert results == [
         ['TWO Christopher Marlowe', 'THREE Christopher Marlowe']
     ]
 
-def test_filter_titles():
+def test_ignore_titles():
     headers1 = ['name']
     data1 = [
         ['Ms. Anne Hathaway'],
@@ -152,13 +152,13 @@ def test_filter_titles():
         ['Mr. Christopher Marlowe'],
         ['Mrs. Anne Hathaway']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, filter_titles=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_titles=True)
     assert keys == ['name', 'person']
     assert results == [
         ['Ms. Anne Hathaway', 'Mrs. Anne Hathaway']
     ]
 
-def test_as_latin():
+def test_ignore_nonlatin():
     headers1 = ['name']
     data1 = [
         ['Charlotte Brontë'],
@@ -169,7 +169,7 @@ def test_as_latin():
         ['Gabriel Garcia Marquez'],
         ['Leo Tolstoy']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, as_latin=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonlatin=True)
     assert keys == ['name', 'person']
     assert results == [
         ['Gabriel García Márquez', 'Gabriel Garcia Marquez']
@@ -192,7 +192,7 @@ def test_ignore_nonalpha():
         ['William Shakespeare', 'William Shakespeare.']
     ]
 
-def test_sort_words():
+def test_ignore_order_words():
     headers1 = ['name']
     data1 = [
         ['William Shakespeare'],
@@ -203,7 +203,7 @@ def test_sort_words():
         ['Anne Hathaway'],
         ['Shakespeare William']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, sort_words=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_order_words=True)
     assert keys == ['name', 'person']
     assert results == [
         ['William Shakespeare', 'Shakespeare William'],
@@ -221,7 +221,7 @@ def test_multiprocess():
         ['BRONTE, CHARLOTTE'],
         ['SHAKESPEARE, WILLIAM']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_case=True, as_latin=True, ignore_nonalpha=True, sort_words=True)
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_case=True, ignore_nonlatin=True, ignore_nonalpha=True, ignore_order_words=True)
     assert keys == ['name', 'person']
     assert results == [
         ['William Shakespeare', 'SHAKESPEARE, WILLIAM'],
