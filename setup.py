@@ -15,9 +15,9 @@ setup(
         'chardet==3.0.4',
         'tqdm==4.18.0',
         'colorama==0.3.9',
-        'unidecode==0.4.21',
-        'dedupe==1.8.1',
-        'jellyfish==0.5.6',
+        'unidecode==1.0.22',
+        'dedupe==1.9.2',
+        'jellyfish==0.6.1',
         'doublemetaphone==0.1'
     ],
     entry_points = {
