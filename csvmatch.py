@@ -18,8 +18,8 @@ def run(
         ignore_nonlatin=False,
         ignore_nonalpha=False,
         ignore_order_words=False,
-        algorithm=None,
-        threshold=0.6,
+        methods=['exact'],
+        thresholds=[0.6],
         output=None,
         join='inner',
         ticker=None
@@ -32,8 +32,6 @@ def run(
         if field not in headers2: raise Exception(field + ': field not found')
     if len(fields1) != len(fields2):
         raise Exception('both files must have the same number of columns specified')
-    if threshold < 0 or threshold > 1:
-        raise Exception('threshold must be between 0.0 and 1.0')
     extracted1 = extract(data1, headers1, fields1)
     extracted2 = extract(data2, headers2, fields2)
     processes = [
@@ -46,10 +44,11 @@ def run(
     ]
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
-    tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and algorithm is not 'bilenko' else None
-    matches = matcher(algorithm)(processed1, processed2, fields1, fields2, threshold, tick)
+    tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and 'bilenko' not in methods else None
+    matcher = build(methods, thresholds, fields1, fields2, tick)
+    matches = matcher(processed1, processed2)
     outputs = format(output, headers1, headers2, fields1, fields2)
-    results = connect(join, data1, headers1, data2, headers2, matches, outputs)
+    results = connect(join, data1, headers1, data2, headers2, list(matches), outputs)
     keys = [key for _, key in outputs]
     return results, keys
 
@@ -88,29 +87,49 @@ def process_ignore_nonalpha(data):
 def process_ignore_order_words(data):
     return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
 
-def matcher(algorithm):
-    if algorithm == None: return match
-    elif algorithm == 'bilenko':
+def build(methods, thresholds, fields1, fields2, tick):
+    if 'bilenko' in methods and len(methods) > 1:
+        raise Exception('bilenko compares whole rows so cannot be combined with other methods')
+    if methods[0] == 'bilenko':
         import fuzzybilenko
-        return fuzzybilenko.match
-    elif algorithm == 'levenshtein':
-        import fuzzylevenshtein
-        return fuzzylevenshtein.match
-    elif algorithm == 'jaro':
-        import fuzzyjaro
-        return fuzzyjaro.match
-    elif algorithm == 'metaphone':
-        import fuzzymetaphone
-        return fuzzymetaphone.match
-    else: raise Exception(algorithm + ': algorithm does not exist')
-
-def match(data1, data2, fields1, fields2, threshold, tick):
-    matches = []
-    for i1, row1 in enumerate(data1):
-        for i2, row2 in enumerate(data2):
-            if row1 == row2: matches.append((i1, i2, 1))
-            if tick: tick()
-    return matches
+        return fuzzybilenko.setup(fields1, fields2)
+    matchers = []
+    for i, (field1, field2) in enumerate(zip(fields1, fields2)):
+        method = methods[i] if len(methods) >= i + 1 else methods[-1]
+        threshold = thresholds[i] if len(thresholds) >= i + 1 else thresholds[-1]
+        if threshold < 0 or threshold > 1:
+            raise Exception('threshold must be between 0.0 and 1.0 (inclusive)')
+        method_function = None
+        if method == 'exact':
+            method_function = lambda value1, value2: 1.0 if value1 == value2 else 0.0
+        elif method == 'levenshtein':
+            import fuzzylevenshtein
+            method_function = fuzzylevenshtein.match
+        elif method == 'jaro':
+            import fuzzyjaro
+            method_function = fuzzyjaro.match
+        elif method == 'metaphone':
+            import fuzzymetaphone
+            method_function = fuzzymetaphone.match
+        else:
+            raise Exception(method + ': method does not exist')
+        matchers.append({
+            'method': method_function,
+            'threshold': threshold
+        })
+    def executor(data1, data2):
+        for i1, row1 in enumerate(data1):
+            for i2, row2 in enumerate(data2):
+                degrees = []
+                for i, matcher in enumerate(matchers):
+                    degree = matcher['method'](row1[i], row2[i])
+                    if degree < matcher['threshold']: break
+                    else: degrees.append(degree)
+                if tick: tick()
+                if len(degrees) == len(matchers):
+                    degree = sum(degrees) / len(degrees)
+                    yield (i1, i2, degree)
+    return executor
 
 def format(output, headers1, headers2, fields1, fields2):
     if len(headers1) != len(set(headers1)):

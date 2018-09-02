@@ -210,7 +210,7 @@ def test_ignore_order_words():
         ['Anne Hathaway', 'Anne Hathaway']
     ]
 
-def test_multiprocess():
+def test_multiple_ignores():
     headers1 = ['name']
     data1 = [
         ['William Shakespeare'],
@@ -239,7 +239,7 @@ def test_fuzzy_levenshtein():
         ['Ann Athawei'],
         ['Will Sheikhspere']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='levenshtein')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, methods=['levenshtein'])
     assert keys == ['name', 'person']
     assert results == [
         ['William Shakespeare', 'Will Sheikhspere'],
@@ -257,7 +257,7 @@ def test_fuzzy_levenshtein_fields():
         ['1564', 'Will Sheikhspere', 'Henley Street'],
         ['1556', 'Anne Hathaway', 'Cottage Lane']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name', 'address'], fields2=['person', 'location'], algorithm='levenshtein', output=['1.name', '1.address', '2.person', '2.location', 'degree'])
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name', 'address'], fields2=['person', 'location'], methods=['levenshtein'], output=['1.name', '1.address', '2.person', '2.location', 'degree'])
     assert keys == ['name', 'address', 'person', 'location', 'degree']
     assert results == [
         ['William Shakespeare', 'Henley Street', 'Will Sheikhspere', 'Henley Street', '0.8157894736842105']
@@ -274,7 +274,7 @@ def test_fuzzy_jaro():
         ['Chris Barlow'],
         ['Willy Shake-Spear']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='jaro')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, methods=['jaro'])
     assert keys == ['name', 'person']
     assert results == [
         ['William Shakespeare', 'Willy Shake-Spear'],
@@ -292,7 +292,7 @@ def test_fuzzy_metaphone():
         ['Ann Athawei'],
         ['Will Sheikhspere']
     ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, algorithm='metaphone')
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, methods=['metaphone'])
     assert keys == ['name', 'person']
     assert results == [
         ['Anne Hathaway', 'Ann Athawei']
@@ -312,7 +312,7 @@ def test_output():
     results, keys = csvmatch.run(data1, headers1, data2, headers2, fields1=['name'], fields2=['person'], output=['1*', '2.died', 'degree'])
     assert keys == ['name', 'born', 'died', 'degree']
     assert results == [
-        ['William Shakespeare', '1564', '1616', '1']
+        ['William Shakespeare', '1564', '1616', '1.0']
     ]
 
 def test_join_left_outer():
