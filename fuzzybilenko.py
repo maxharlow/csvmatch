@@ -4,8 +4,8 @@ import colorama
 
 def setup(fields1, fields2):
     def executor(data1, data2):
-        input1 = {i: {fields1[j]: value for j, value in enumerate(row)} for i, row in enumerate(data1)}
-        input2 = {i: {fields1[j]: value for j, value in enumerate(row)} for i, row in enumerate(data2)}
+        input1 = {i: {fields1[j]: value if sys.version_info >= (3, 0) else value.encode('ascii', 'ignore') for j, value in enumerate(row)} for i, row in enumerate(data1)}
+        input2 = {i: {fields1[j]: value if sys.version_info >= (3, 0) else value.encode('ascii', 'ignore') for j, value in enumerate(row)} for i, row in enumerate(data2)}
         fields = [{'field': field, 'type': 'String'} for field in fields1]
         linker = dedupe.RecordLink(fields)
         linker.sample(input1, input2, sample_size=1500)
