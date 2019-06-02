@@ -97,7 +97,7 @@ The more examples you give it, the better the results will be. At minimum, you s
 
 [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric which counts the number of changes that would have to be made to transform one string into another.
 
-For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-t`.
+For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-r`.
 
     $ csvmatch data1.csv data2.csv --fuzzy levenshtein
 
