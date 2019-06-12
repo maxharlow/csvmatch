@@ -14,10 +14,10 @@ setup(
     install_requires=[
         'chardet==3.0.4',
         'tqdm==4.18.0',
-        'colorama==0.3.9',
-        'unidecode==1.0.22',
-        'dedupe==1.9.2',
-        'jellyfish==0.6.1',
+        'colorama==0.4.1',
+        'unidecode==1.0.23',
+        'dedupe==1.9.7',
+        'jellyfish==0.7.2',
         'doublemetaphone==0.1'
     ],
     entry_points = {
