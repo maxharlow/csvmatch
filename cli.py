@@ -35,16 +35,20 @@ def arguments():
     parser.add_argument('--enc2', type=str, metavar='ENCODING', help='encoding of the second file (default is to autodetect)')
     parser.add_argument('-1', '--fields1', nargs='+', type=str, metavar='FIELD', help='one or more column names from the first CSV file that should be used (default is all columns)')
     parser.add_argument('-2', '--fields2', nargs='+', type=str, metavar='FIELD', help='one or more column names from the second CSV file that should be used (default is all columns)')
-    parser.add_argument('-i', '--ignore-case', action='store_true', help='ignore case when comparing (default is case-sensitive)')
-    parser.add_argument('-l', '--filter', dest='ignore_custom', metavar='FILENAME', help='filter out terms from a newline-separated file of regular expressions when comparing')
-    parser.add_argument('-t', '--filter-titles', action='store_true', dest='ignore_titles', help='filter out a predefined list of name titles (Mr, Ms, etc) when comparing')
-    parser.add_argument('-a', '--ignore-nonalpha', action='store_true', help='ignore non-alphanumeric characters when comparing')
-    parser.add_argument('-n', '--as-latin', action='store_true', dest='ignore_nonlatin', help='convert to latin alphabet when comparing')
-    parser.add_argument('-s', '--sort-words', action='store_true', dest='ignore_order_words', help='sort words alphabetically when comparing')
+    parser.add_argument('-i', '--ignore-case', action='store_true', help='ignore case (default is case-sensitive)')
+    parser.add_argument('-l', '--ignore-custom', dest='ignore_custom', metavar='FILENAME', help='ignore anything matched from a newline-separated file of regular expressions')
+    parser.add_argument('-t', '--ignore-titles', action='store_true', dest='ignore_titles', help='ignore a predefined list of name titles (such as Mr, Ms, etc)')
+    parser.add_argument('-a', '--ignore-nonalpha', action='store_true', help='ignore non-alphanumeric characters')
+    parser.add_argument('-n', '--ignore-nonlatin', action='store_true', dest='ignore_nonlatin', help='ignore characters from non-latin alphabets (accented characters are compared to their unaccented equivalent)')
+    parser.add_argument('-s', '--ignore-order-words', action='store_true', dest='ignore_order_words', help='ignore the order words are given in')
     parser.add_argument('-j', '--join', type=str, default='inner', metavar='TYPE', help='the type of join to use: \'inner\', \'left-outer\', \'right-outer\', or \'full-outer\' (default is inner)')
     parser.add_argument('-o', '--output', nargs='+', type=str, metavar='FIELD', help='space-separated list of fields that should be outputted, prefixed by \'1.\' or \'2.\' depending on their source file (default is the field lists if specified, otherwise all columns); if using fuzzy matching \'degree\' will add a column with a number between 0 - 1 indicating the strength of each match')
     parser.add_argument('-f', '--fuzzy', nargs='*', type=str, default=['exact'], dest='methods', metavar='METHOD', help='perform a fuzzy match, and an optional specified algorithm: \'bilenko\', \'levenshtein\', \'jaro\', or \'metaphone\' (default is bilenko); multiple algorithms can be specified which will apply to each field respectively')
     parser.add_argument('-r', '--threshold', nargs='+', type=float, default=[0.6], dest='thresholds', metavar='THRESHOLD', help='the threshold for a fuzzy match as a number between 0 and 1 (default is 0.6); multiple numbers can be specified which will apply to each field respectively')
+    parser.add_argument('--filter', dest='ignore_custom', metavar='FILENAME', help=argparse.SUPPRESS) # legacy alias for -l
+    parser.add_argument('--filter-titles', action='store_true', dest='ignore_titles', help=argparse.SUPPRESS) # legacy alias for -t
+    parser.add_argument('--as-latin', action='store_true', dest='ignore_nonlatin', help=argparse.SUPPRESS) # legacy alias for -n
+    parser.add_argument('--sort-words', action='store_true', dest='ignore_order_words', help=argparse.SUPPRESS) # legacy alias for -s
     args = vars(parser.parse_args())
     if args['FILE1'] == '-' and args['FILE2'] == '-':
         parser.print_help(sys.stderr)
