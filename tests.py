@@ -192,6 +192,23 @@ def test_ignore_nonalpha():
         ['William Shakespeare', 'William Shakespeare.']
     ]
 
+def test_ignore_nonalpha_spaces():
+    headers1 = ['place']
+    data1 = [
+        ['Stratford-upon-Avon'],
+        ['Deptford']
+    ]
+    headers2 = ['place']
+    data2 = [
+        ['Shottery'],
+        ['Stratford upon Avon']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonalpha=True)
+    assert keys == ['place', 'place']
+    assert results == [
+        ['Stratford-upon-Avon', 'Stratford upon Avon']
+    ]
+
 def test_ignore_order_words():
     headers1 = ['name']
     data1 = [

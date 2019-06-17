@@ -38,9 +38,9 @@ def run(
         (process_ignore_case, ignore_case),
         (process_ignore_titles(ignore_case), ignore_titles),
         (process_ignore_custom(ignore_custom, ignore_case), ignore_custom),
+        (process_ignore_order_words, ignore_order_words),
         (process_ignore_nonlatin, ignore_nonlatin),
-        (process_ignore_nonalpha, ignore_nonalpha),
-        (process_ignore_order_words, ignore_order_words)
+        (process_ignore_nonalpha, ignore_nonalpha)
     ]
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
@@ -77,15 +77,15 @@ def process_ignore_titles(ignore_case):
     titles = [line[:-1] for line in io.open(filename)]
     return process_ignore_custom(titles, ignore_case)
 
+def process_ignore_order_words(data):
+    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
+
 def process_ignore_nonlatin(data):
     return [[unidecode.unidecode(value) for value in row] for row in data]
 
 def process_ignore_nonalpha(data):
-    regex = re.compile('[^A-Za-z0-9 ]') # does not take into account non-latin alphabet
+    regex = re.compile('[^A-Za-z0-9]') # does not take into account non-latin alphabet
     return [[regex.sub('', value) for value in row] for row in data]
-
-def process_ignore_order_words(data):
-    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
 
 def build(methods, thresholds, fields1, fields2, tick):
     if 'bilenko' in methods and len(methods) > 1:
