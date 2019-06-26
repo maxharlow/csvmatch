@@ -13,11 +13,12 @@ def run(
         fields1=None,
         fields2=None,
         ignore_case=False,
+        ignore_nonalpha=False,
+        ignore_nonlatin=False,
+        ignore_order_words=False,
+        ignore_order_letters=False,
         ignore_titles=False,
         ignore_custom=None,
-        ignore_nonlatin=False,
-        ignore_nonalpha=False,
-        ignore_order_words=False,
         methods=['exact'],
         thresholds=[0.6],
         output=None,
@@ -36,11 +37,12 @@ def run(
     extracted2 = extract(data2, headers2, fields2)
     processes = [
         (process_ignore_case, ignore_case),
-        (process_ignore_titles(ignore_case), ignore_titles),
         (process_ignore_custom(ignore_custom, ignore_case), ignore_custom),
-        (process_ignore_order_words, ignore_order_words),
-        (process_ignore_nonlatin, ignore_nonlatin),
-        (process_ignore_nonalpha, ignore_nonalpha)
+        (process_ignore_nonlatin, ignore_nonlatin), # must be after custom in case it expects an accented character that would then be removed and prevent a match
+        (process_ignore_titles(ignore_case), ignore_titles), # must be after nonlatin so characters are convered at this point (also as no titles include accented characters)
+        (process_ignore_order_words, ignore_order_words), # must be after titles and custom so regex anchors work, and after nonlatin so words sorted in comparable orders
+        (process_ignore_nonalpha, ignore_nonalpha), # must be after order words so there are still spaces
+        (process_ignore_order_letters, ignore_order_letters) # must be after nonlatin so accented characters are in latin-equivalent order, and after case so that doesn't change the order
     ]
     processed1 = process(extracted1, processes)
     processed2 = process(extracted2, processes)
@@ -65,6 +67,19 @@ def process(data, processes):
 def process_ignore_case(data):
     return [[value.lower() for value in row] for row in data]
 
+def process_ignore_nonalpha(data):
+    regex = re.compile('[\W_]+')
+    return [[regex.sub('', value) for value in row] for row in data]
+
+def process_ignore_nonlatin(data):
+    return [[unidecode.unidecode(value) for value in row] for row in data]
+
+def process_ignore_order_words(data):
+    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
+
+def process_ignore_order_letters(data):
+    return [[''.join(sorted(value)) for value in row] for row in data]
+
 def process_ignore_custom(filters, ignore_case):
     if filters == None: return
     def filterer(data):
@@ -76,16 +91,6 @@ def process_ignore_titles(ignore_case):
     filename = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'csvmatch-titles.txt.py')
     titles = [line[:-1] for line in io.open(filename)]
     return process_ignore_custom(titles, ignore_case)
-
-def process_ignore_order_words(data):
-    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
-
-def process_ignore_nonlatin(data):
-    return [[unidecode.unidecode(value) for value in row] for row in data]
-
-def process_ignore_nonalpha(data):
-    regex = re.compile('[^A-Za-z0-9]') # does not take into account non-latin alphabet
-    return [[regex.sub('', value) for value in row] for row in data]
 
 def build(methods, thresholds, fields1, fields2, tick):
     if 'bilenko' in methods and len(methods) > 1:

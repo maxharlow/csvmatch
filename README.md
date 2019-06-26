@@ -58,7 +58,7 @@ You can also compare multiple columns, so if we wanted to find which name and lo
 
 By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but case can be ignored with `-i`.
 
-Other things can also be ignored. We can ignore non-alphanumeric characters (`-a`), common English name prefixes such as Mr and Ms (`-t`), characters from non-latin alphabets (`-n`), and the order words are given in (`-s`). Terms specific to your data can be ignored by passing a text file containing a regular expression on each line (`-l`).
+Other things can also be ignored. We can ignore non-alphanumeric characters (`-a`), characters from non-latin alphabets (`-n`), the order words are given in (`-s`), and the order letters are given in (`-e`), and common English name prefixes such as Mr and Ms (`-t`). Terms specific to your data can be ignored by passing a text file containing a regular expression on each line (`-l`).
 
 By default the columns used in the output are the same ones used for matching. Other sets of columns can be specified using the `--output` parameter. This takes a space-separated list of column names, each prefixed with a number and a dot indicating which file that field is from:
 

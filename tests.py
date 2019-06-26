@@ -179,6 +179,7 @@ def test_ignore_nonalpha():
     headers1 = ['name']
     data1 = [
         ['William Shakespeare'],
+        ['Anne-Hathaway'],
         ['Christopher Marlowe']
     ]
     headers2 = ['person']
@@ -189,24 +190,8 @@ def test_ignore_nonalpha():
     results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonalpha=True)
     assert keys == ['name', 'person']
     assert results == [
-        ['William Shakespeare', 'William Shakespeare.']
-    ]
-
-def test_ignore_nonalpha_spaces():
-    headers1 = ['place']
-    data1 = [
-        ['Stratford-upon-Avon'],
-        ['Deptford']
-    ]
-    headers2 = ['place']
-    data2 = [
-        ['Shottery'],
-        ['Stratford upon Avon']
-    ]
-    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonalpha=True)
-    assert keys == ['place', 'place']
-    assert results == [
-        ['Stratford-upon-Avon', 'Stratford upon Avon']
+        ['William Shakespeare', 'William Shakespeare.'],
+        ['Anne-Hathaway', 'Anne Hathaway!']
     ]
 
 def test_ignore_order_words():
@@ -227,7 +212,24 @@ def test_ignore_order_words():
         ['Anne Hathaway', 'Anne Hathaway']
     ]
 
-def test_multiple_ignores():
+def test_ignore_order_letters():
+    headers1 = ['name']
+    data1 = [
+        ['w ill iam shake speare'],
+        ['judith quiney']
+    ]
+    headers2 = ['text']
+    data2 = [
+        ['i am a weakish speller'],
+        ['something else']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_order_letters=True)
+    assert keys == ['name', 'text']
+    assert results == [
+        ['w ill iam shake speare', 'i am a weakish speller']
+    ]
+
+def test_multiple_ignores1():
     headers1 = ['name']
     data1 = [
         ['William Shakespeare'],
@@ -243,6 +245,74 @@ def test_multiple_ignores():
     assert results == [
         ['William Shakespeare', 'SHAKESPEARE, WILLIAM'],
         ['Charlotte Brontë', 'BRONTE, CHARLOTTE']
+    ]
+
+def test_multiple_ignores2():
+    headers1 = ['name']
+    data1 = [
+        ['John Shakespeare'],
+        ['Mary Árden']
+    ]
+    headers2 = ['person']
+    data2 = [
+        ['Arden, Mary'],
+        ['Hathaway, Anne']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonlatin=True, ignore_nonalpha=True, ignore_order_words=True)
+    assert keys == ['name', 'person']
+    assert results == [
+        ['Mary Árden', 'Arden, Mary']
+    ]
+
+def test_multiple_ignores3():
+    headers1 = ['name']
+    data1 = [
+        ['E M Forster'],
+        ['J D Salinger']
+    ]
+    headers2 = ['person']
+    data2 = [
+        ['H a r p e r, Lee'],
+        ['F ó r s t e r, ÉM']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonlatin=True, ignore_nonalpha=True, ignore_order_letters=True)
+    assert keys == ['name', 'person']
+    assert results == [
+        ['E M Forster', 'F ó r s t e r, ÉM']
+    ]
+
+def test_multiple_ignores4():
+    headers1 = ['name']
+    data1 = [
+        ['Prof. William Shakespeare'],
+        ['Ms Anne Hathaway']
+    ]
+    headers2 = ['person']
+    data2 = [
+        ['Pröf William Shakespeare'],
+        ['Christopher Marlowe']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonlatin=True, ignore_titles=True)
+    assert keys == ['name', 'person']
+    assert results == [
+        ['Prof. William Shakespeare', 'Pröf William Shakespeare']
+    ]
+
+def test_multiple_ignores5():
+    headers1 = ['name']
+    data1 = [
+        ['William Shakéspeare'],
+        ['Christopher Marlowe']
+    ]
+    headers2 = ['person']
+    data2 = [
+        ['Anne Hathaway'],
+        ['William Shakespeare']
+    ]
+    results, keys = csvmatch.run(data1, headers1, data2, headers2, ignore_nonalpha=True, ignore_nonlatin=True)
+    assert keys == ['name', 'person']
+    assert results == [
+        ['William Shakéspeare', 'William Shakespeare']
     ]
 
 def test_fuzzy_levenshtein():
