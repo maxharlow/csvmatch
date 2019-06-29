@@ -3,8 +3,6 @@ CSV Match
 
 Find (fuzzy) matches between two CSV files in the terminal.
 
-Tested on Python 3.6 and 2.7.
-
 [There's a tutorial on how CSV Match can be used for investigative journalism here.](https://github.com/maxharlow/tutorials/tree/master/find-connections-with-fuzzy-matching)
 
 
@@ -13,7 +11,7 @@ Installing
 
     pip install csvmatch
 
-Get an error saying 'command not found'? Sometimes `pip` has a different name -- try typing `pip3` or `pip2` instead. If you get an error saying 'permission denied', try prepending `sudo`.
+Get an error saying 'command not found'? Sometimes `pip` has a different name -- try typing `pip3` instead. If you get an error saying 'permission denied', try prepending `sudo`.
 
 Usage
 -----

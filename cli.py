@@ -84,20 +84,17 @@ def read(filename, encoding):
         sys.stderr.write(filename + ': autodetected character encoding as ' + encoding.upper() + '\n')
     try:
         text_decoded = text.decode(encoding)
-        reader_io = io.StringIO(text_decoded, newline=None) if sys.version_info >= (3, 0) else io.BytesIO(text_decoded.encode('utf8').replace('\r\n', '\n'))
-        reader = csv.reader(reader_io)
+        reader = csv.reader(io.StringIO(text_decoded, newline=None))
         headers = next(reader)
-        data = [[value if sys.version_info >= (3, 0) else value.decode('utf8') for value in row] for row in reader]
-        return data, headers
+        return list(reader), headers
     except UnicodeDecodeError as e: raise Exception(filename + ': could not read file -- try specifying the encoding')
     except csv.Error as e: raise Exception(filename + ': could not read file as a CSV')
 
 def format(results, keys):
-    lines = [[value if sys.version_info >= (3, 0) else value.encode('utf8') for value in row] for row in results]
-    writer_io = io.StringIO() if sys.version_info >= (3, 0) else io.BytesIO()
+    writer_io = io.StringIO()
     writer = csv.writer(writer_io, lineterminator='\n') # can't use dictwriter as headers are printed even when there's no results
     writer.writerow(keys)
-    writer.writerows(lines)
+    writer.writerows(results)
     return writer_io.getvalue()
 
 if __name__ == '__main__':

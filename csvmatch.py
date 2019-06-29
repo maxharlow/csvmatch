@@ -45,11 +45,11 @@ def run(
         (process_ignore_nonalpha, ignore_nonalpha), # must be after order words so there are still spaces
         (process_ignore_order_letters, ignore_order_letters) # must be after nonlatin so accented characters are in latin-equivalent order, and after case so that doesn't change the order
     ]
-    processed1 = process(extracted1, processes)
-    processed2 = process(extracted2, processes)
+    processed1 = list(process(extracted1, processes))
+    processed2 = list(process(extracted2, processes))
     tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and 'bilenko' not in methods else None
     matcher = build(methods, thresholds, fields1, fields2, tick)
-    matches = matcher(list(processed1), list(processed2))
+    matches = matcher(processed1, processed2)
     outputs = format(output, headers1, headers2, fields1, fields2)
     results = connect(join, data1, headers1, data2, headers2, list(matches), outputs)
     keys = [key for _, key in outputs]
