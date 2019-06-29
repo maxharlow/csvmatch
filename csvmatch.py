@@ -1,3 +1,4 @@
+import functools
 import sys
 import os
 import io
@@ -48,7 +49,7 @@ def run(
     processed2 = process(extracted2, processes)
     tick = ticker('Matching', len(processed1) * len(processed2)) if ticker and 'bilenko' not in methods else None
     matcher = build(methods, thresholds, fields1, fields2, tick)
-    matches = matcher(processed1, processed2)
+    matches = matcher(list(processed1), list(processed2))
     outputs = format(output, headers1, headers2, fields1, fields2)
     results = connect(join, data1, headers1, data2, headers2, list(matches), outputs)
     keys = [key for _, key in outputs]
@@ -59,32 +60,31 @@ def extract(data, headers, fields):
     return [[row[i] for i in indexes] for row in data]
 
 def process(data, processes):
-    processed = list(data) # a copy
-    for process, selected in processes:
-        processed = process(processed) if selected else processed
-    return processed
+    functions = [function for function, selected in processes if selected]
+    processor = functools.reduce(lambda f1, f2: lambda x: f2(f1(x)), functions, lambda x: x)
+    return (processor(row) for row in data)
 
-def process_ignore_case(data):
-    return [[value.lower() for value in row] for row in data]
+def process_ignore_case(row):
+    return [value.lower() for value in row]
 
-def process_ignore_nonalpha(data):
+def process_ignore_nonalpha(row):
     regex = re.compile('[\W_]+')
-    return [[regex.sub('', value) for value in row] for row in data]
+    return [regex.sub('', value) for value in row]
 
-def process_ignore_nonlatin(data):
-    return [[unidecode.unidecode(value) for value in row] for row in data]
+def process_ignore_nonlatin(row):
+    return [unidecode.unidecode(value) for value in row]
 
-def process_ignore_order_words(data):
-    return [[' '.join(sorted(value.split(' '))) for value in row] for row in data]
+def process_ignore_order_words(row):
+    return [' '.join(sorted(value.split(' '))) for value in row]
 
-def process_ignore_order_letters(data):
-    return [[''.join(sorted(value)) for value in row] for row in data]
+def process_ignore_order_letters(row):
+    return [''.join(sorted(value)) for value in row]
 
 def process_ignore_custom(filters, ignore_case):
     if filters == None: return
-    def filterer(data):
+    def filterer(row):
         regex = re.compile('(' + '|'.join(filters) + ')', re.IGNORECASE if ignore_case else 0)
-        return [[regex.sub('', value) for value in row] for row in data]
+        return [regex.sub('', value) for value in row]
     return filterer
 
 def process_ignore_titles(ignore_case):
