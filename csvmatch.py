@@ -57,7 +57,7 @@ def run(
 
 def extract(data, headers, fields):
     indexes = [headers.index(field) for field in fields]
-    return [[row[i] for i in indexes] for row in data]
+    return ([row[i] for i in indexes] for row in data)
 
 def process(data, processes):
     functions = [function for function, selected in processes if selected]
