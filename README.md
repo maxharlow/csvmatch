@@ -68,7 +68,7 @@ By default the columns used in the output are the same ones used for matching. O
 
 There are also some special column definitions. `1*` and `2*` expand into all columns from that file. Where a fuzzy matching algorithm has been used `degree` will add a column with a number between 0 - 1 indicating the strength of each match.
 
-By default the two files are linked using an inner join -- only successful matches are returned. However using `-f` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
+By default the two files are linked using an inner join -- only successful matches are returned. However using `-j` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
 
 We can combine some of the above options to perform operations alike Excel's `VLOOKUP`. So if we wanted to add a column to `data2.csv` giving the codename of each person that is specified in `data1.csv`:
 
