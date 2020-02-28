@@ -14,7 +14,7 @@ def setup(fields1, fields2):
             try:
                 linker.train()
                 break
-            except ValueError: sys.stderr.write('\nYou need to do more training.\n')
+            except: sys.stderr.write('\nYou need to do more training.\n')
         threshold = linker.threshold(input1, input2, recall_weight=1)
         pairs = linker.match(input1, input2, threshold)
         matches = []

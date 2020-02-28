@@ -14,9 +14,9 @@ setup(
     install_requires=[
         'chardet==3.0.4',
         'tqdm==4.18.0',
-        'colorama==0.4.1',
-        'unidecode==1.0.23',
-        'dedupe==1.9.7',
+        'colorama==0.4.3',
+        'unidecode==1.1.1',
+        'dedupe==1.10.0',
         'jellyfish==0.7.2',
         'doublemetaphone==0.1'
     ],

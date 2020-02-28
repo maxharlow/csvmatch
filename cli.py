@@ -13,7 +13,7 @@ __version__ = '1.19'
 
 def main():
     logging.captureWarnings(True)
-    logging.basicConfig(level=logging.WARN, format='%(message)s')
+    logging.basicConfig(level=logging.WARN, format='Warning: %(message)s')
     warnings.formatwarning = lambda e, *args: str(e)
     sys.stderr.write('Starting up...\n')
     try:
