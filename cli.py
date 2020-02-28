@@ -95,7 +95,7 @@ def format(results, keys):
     writer = csv.writer(writer_io, lineterminator='\n') # can't use dictwriter as headers are printed even when there's no results
     writer.writerow(keys)
     writer.writerows(results)
-    return writer_io.getvalue()
+    return writer_io.getvalue()[:-1]
 
 if __name__ == '__main__':
     main()
