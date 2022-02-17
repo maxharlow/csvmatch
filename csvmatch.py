@@ -97,7 +97,7 @@ def build(methods, thresholds, fields1, fields2, tick):
         raise Exception('bilenko compares whole rows so cannot be combined with other methods')
     if methods[0] == 'bilenko':
         import fuzzybilenko
-        return fuzzybilenko.setup(fields1, fields2)
+        return fuzzybilenko.setup(fields1, fields2, thresholds[0])
     matchers = []
     for i, (field1, field2) in enumerate(zip(fields1, fields2)):
         method = methods[i] if len(methods) >= i + 1 else methods[-1]
