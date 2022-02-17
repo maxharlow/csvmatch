@@ -1,9 +1,8 @@
 from setuptools import setup
-from cli import __version__
 
 setup(
     name='csvmatch',
-    version=__version__,
+    version='1.21',
     description='Find (fuzzy) matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
