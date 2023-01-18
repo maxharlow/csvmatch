@@ -11,11 +11,11 @@ setup(
     license='Apache',
     packages=[''],
     install_requires=[
-        'chardet==4.0.0',
-        'tqdm==4.62.3',
-        'colorama==0.4.4',
-        'unidecode==1.3.2',
-        'dedupe==2.0.11',
+        'chardet==5.1.0',
+        'tqdm==4.64.1',
+        'colorama==0.4.6',
+        'unidecode==1.3.6',
+        'dedupe==2.0.21',
         'jellyfish==0.9.0',
         'doublemetaphone==1.1'
     ],
@@ -33,8 +33,8 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: Utilities'
     ]

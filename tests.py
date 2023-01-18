@@ -376,13 +376,13 @@ def test_fuzzy_metaphone():
     ]
     headers2 = ['person']
     data2 = [
-        ['Ann Athawei'],
+        ['Ann Hathaweii'],
         ['Will Sheikhspere']
     ]
     results, keys = csvmatch.run(data1, headers1, data2, headers2, methods=['metaphone'])
     assert keys == ['name', 'person']
     assert results == [
-        ['Anne Hathaway', 'Ann Athawei']
+        ['Anne Hathaway', 'Ann Hathaweii']
     ]
 
 def test_output():

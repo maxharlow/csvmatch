@@ -34,7 +34,7 @@ def labelling(linker):
                 continue
             for record in pair:
                 sys.stderr.write('\n')
-                for field in set(field.field for field in linker.data_model.primary_fields):
+                for field in set(field.field for field in linker.data_model.primary_variables):
                     sys.stderr.write(colorama.Style.BRIGHT + field + ': ' + colorama.Style.RESET_ALL + record[field] + '\n')
             sys.stderr.write('\n')
             responded = False
