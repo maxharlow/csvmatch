@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='csvmatch',
-    version='1.23',
+    version='1.24',
     description='Find (fuzzy) matches between two CSV files in the terminal.',
     long_description=open('README.md').read(),
     author='Max Harlow',
