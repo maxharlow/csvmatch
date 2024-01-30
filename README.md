@@ -1,162 +1,504 @@
 CSV Match
 =========
 
-Find (fuzzy) matches between two CSV files in the terminal.
+Find fuzzy matches between CSV files. Based on [Textmatch](https://github.com/maxharlow/textmatch).
 
-[There's a tutorial on how CSV Match can be used for investigative journalism here.](https://github.com/maxharlow/tutorials/tree/master/find-connections-with-fuzzy-matching)
+Fuzzy matching is the art and science of connecting up bits of information that are written differently but represent the same _thing_ – such as a person or company.
 
 
 Installing
 ----------
 
-    pip install csvmatch
+The best way to install is with `pipx`, which can be installed with Homebrew: `brew install pipx`. Then:
 
-Get an error saying 'command not found'? Sometimes `pip` has a different name -- try typing `pip3` instead. If you get an error saying 'permission denied', try prepending `sudo`.
+    pipx install csvmatch
+
+
+Getting started
+---------------
+
+The best way to approach fuzzy matching with CSV Match is to start with an exact match. From there, you can incrementally improve the results by telling CSV Match about relevant information that should be taken into account and irrelevant information that should be disregarded. Experiment with different approaches. It is helpful to know what the data looks like, and how it has been collected.
+
+The input files can be in CSV or Parquet format. The output results will be a CSV file.
+
+<details>
+  <summary>Example</summary>
+
+  **`data1.csv`**:
+  | name              | place    | codename  |
+  |-------------------|----------|-----------|
+  | Sam Collins       | Vietnam  | none      |
+  | Roy Bland         | London   | Soldier   |
+  | George Smiley     | London   | Beggerman |
+  | Bill Haydon       | London   | Tailor    |
+  | Perçy Allélíne    | London   | Tinker    |
+  | Kretzschmar       | Hamburg  | none      |
+  | Oliver Lacon      | London   | none      |
+  | Jim Prideaux      | Slovakia | none      |
+  | Peter Guillam Esq | Brixton  | none      |
+  | Toby Esterhase    | Vienna   | Poorman   |
+  | Connie Sachs      | Oxford   | none      |
+
+  **`data2.csv`**:
+  | Person Name                | Location       |
+  |----------------------------|----------------|
+  | Maria Andreyevna Ostrakova | Russia         |
+  | Konny Saks                 | Oxford         |
+  | Tony Esterhase             | Vienna         |
+  | Peter Guillam              | Brixton        |
+  | Mr Jim Prideaux            | Czech Republic |
+  | Lacon Oliver               | Cambridge      |
+  | Claus Kretzschmar          | Hamburg        |
+  | Richard Bland              | London         |
+  | Roy Rodgers                | Romania        |
+  | Percy Alleline             | London         |
+  | Bill-Haydon                | London         |
+  | George SMILEY              | London         |
+  | Roy Bland                  | UK             |
+  | Sam Collins                | Vietnam        |
+
+  To run an exact match on the **name** column from the first file against **Person Name** from the second:
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        > matches.csv
+
+  The resulting matches include the two names which are written exactly the same:
+
+  | name        | place   | codename | Person Name | Location |
+  |-------------|---------|----------|-------------|----------|
+  | Roy Bland   | London  | Soldier  | Roy Bland   | UK       |
+  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+
+</details>
+
+
+Matches are _many-to-many_, ie. it is possible for one row in the first file to match several rows in the second, and vice-versa.
+
+> [!TIP]
+> There is a tradeoff between false negatives and false positives – it is often better to have some incorrect matches in your results that can be manually checked afterwards than to have correct matches missing.
+
 
 Usage
 -----
 
-Say you have one CSV file such as:
+CSV Match only requires two arguments, the first file followed by the second. All others are optional, described below:
 
-    name,location,codename
-    George Smiley,London,Beggerman
-    Percy Alleline,London,Tinker
-    Roy Bland,London,Soldier
-    Toby Esterhase,Vienna,Poorman
-    Peter Guillam,Brixton,none
-    Bill Haydon,London,Tailor
-    Oliver Lacon,London,none
-    Jim Prideaux,Slovakia,none
-    Connie Sachs,Oxford,none
+### Fields
 
-And another such as:
+The `fields1` and `fields2` arguments accept one or more column names that should be used for the match. If the column name has a space it should be wrapped in quotes. These should be in the same order for both files – the first column specified for the first file will be compared against the first column specified for the second file, and so on. Defaults to comparing all columns. This flag can be specified multiple times for [blocking](#blocking).
 
-    Person Name,Location
-    Maria Andreyevna Ostrakova,Russia
-    Otto Leipzig,Estonia
-    George SMILEY,London
-    Peter Guillam,Brixton
-    Konny Saks,Oxford
-    Saul Enderby,London
-    Sam Collins,Vietnam
-    Tony Esterhase,Vienna
-    Claus Kretzschmar,Hamburg
+<details>
+  <summary>Example</summary>
 
-You can then find which names are in both files:
+  To match on the **name** and **place** columns from the first file against **Person Name** and **Location** from the second:
 
-    $ csvmatch data1.csv data2.csv \
-        --fields1 name \
-        --fields2 'Person Name'
+    $ csvmatch \
+      data1.csv \
+      data2.csv \
+      --fields1 name place \
+      --fields2 'Person Name' Location \
+      > matches.csv
 
-You can also compare multiple columns, so if we wanted to find which name and location combinations are in both files we could:
+  The resulting matches include the single name-place pair which is the same in both files:
 
-    $ csvmatch data1.csv data2.csv \
-        --fields1 name location \
-        --fields2 'Person Name' Location
+  | name        | place   | codename | Person Name | Location |
+  |-------------|---------|----------|-------------|----------|
+  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+</details>
 
-By default, all columns are used to compare rows. Specific columns can be also be given to be compared -- these should be in the same order for both files. Column headers with a space should be enclosed in quotes. Matches are case-sensitive by default, but case can be ignored with `-i`.
 
-Other things can also be ignored. We can ignore non-alphanumeric characters (`-a`), characters from non-latin alphabets (`-n`), the order words are given in (`-s`), and the order letters are given in (`-e`), and common English name prefixes such as Mr and Ms (`-t`). Terms specific to your data can be ignored by passing a text file containing a regular expression on each line (`-l`).
+### Ignorance
 
-By default the columns used in the output are the same ones used for matching. Other sets of columns can be specified using the `--output` parameter. This takes a space-separated list of column names, each prefixed with a number and a dot indicating which file that field is from:
+The `ignores` argument accepts one or more characteristics which should be disregarded for two records to be considered a match. This flag can be specified multiple times for [blocking](#blocking).
 
-    $ csvmatch data1.csv data2.csv \
-        --fields1 name location \
-        --fields2 'Person Name' Location \
-        --output 1.name '2.Person Name' 2.Location \
-        > results.csv
+Combining different forms of ignorance can be quite powerful. The order in which you specify them is not significant.
 
-There are also some special column definitions. `1*` and `2*` expand into all columns from that file. Where a fuzzy matching algorithm has been used `degree` will add a column with a number between 0 - 1 indicating the strength of each match.
+**`case`** ignores how text is capitalised.
 
-By default the two files are linked using an inner join -- only successful matches are returned. However using `-j` you can specify a `left-outer` join which will return everything from the first file, whether there was a match or not. You can also specify `right-outer` to do the same but for the second file, and `full-outer` to return everything from both files.
+<details>
+  <summary>Example</summary>
 
-We can combine some of the above options to perform operations alike Excel's `VLOOKUP`. So if we wanted to add a column to `data2.csv` giving the codename of each person that is specified in `data1.csv`:
-
-    $ csvmatch data1.csv data2.csv \
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
         --fields1 name \
         --fields2 'Person Name' \
-        --join right-outer \
-        --output 2* 1.codename \
-        > results.csv
+        --ignore case \
+        > matches.csv
 
-### Fuzzy matching
+  The resulting matches include George Smiley, whose surname is in all-capitals in the second file:
 
-CSV Match also supports fuzzy matching. This can be combined with any of the above options.
+  | name          | place   | codename  | Person Name   | Location |
+  |---------------|---------|-----------|---------------|----------|
+  | George Smiley | London  | Beggerman | George SMILEY | London   |
+  | Roy Bland     | London  | Soldier   | Roy Bland     | UK       |
+  | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
+</details>
 
-#### Bilenko
+**`nonalpha`** ignores anything that isn't a number or a letter.
 
-The default fuzzy mode makes use of the [Dedupe library](https://github.com/dedupeio/dedupe) built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko. This algorithm asks you to give a number of examples of records from each dataset that are the same -- this information is extrapolated to link the rest of the dataset.
+<details>
+  <summary>Example</summary>
 
-    $ csvmatch data1.csv data2.csv --fuzzy
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore nonalpha \
+        > matches.csv
 
-The more examples you give it, the better the results will be. At minimum, you should try to provide 10 positive matches and 10 negative matches.
+  The resulting matches include Bill Haydon, whose name is written with a hypen in the second file:
 
-#### Levenshtein
+  | name        | place   | codename | Person Name | Location |
+  |-------------|---------|----------|-------------|----------|
+  | Bill Haydon | London  | Tailor   | Bill-Haydon | London   |
+  | Roy Bland   | London  | Soldier  | Roy Bland   | UK       |
+  | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
+</details>
 
-[Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) is a string distance metric which counts the number of changes that would have to be made to transform one string into another.
+**`nonlatin`** ignores nonlatin characters – so a character such as an `é` will be seen as if it were an `e`.
 
-For two strings to be considered a match, we require 60% of the longer string to be the same as the shorter one. This threshold can be modified by passing a number between 0.0 and 1.0 with `-r`.
+<details>
+  <summary>Example</summary>
 
-    $ csvmatch data1.csv data2.csv --fuzzy levenshtein
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore nonlatin \
+        > matches.csv
 
-    name,Person Name
-    George Smiley,George SMILEY
-    Toby Esterhase,Tony Esterhase
-    Peter Guillam,Peter Guillam
+  The resulting matches include Percy Alleline, whose name is written with several diacritics in the first file:
 
-Here this matches Toby Esterhase and Tony Esterhase -- Levenshtein is good at picking up typos and other small differences in spelling.
+  | name             | place   | codename | Person Name    | Location |
+  |------------------|---------|----------|----------------|----------|
+  | Perçy Allélíne   | London  | Tinker   | Percy Alleline | London   |
+  | Roy Bland        | London  | Soldier  | Roy Bland      | UK       |
+  | Sam Collins      | Vietnam | none     | Sam Collins    | Vietnam  |
+</details>
 
-### Jaro
+**`words-leading`** ignores all words except the last. This is useful for matching on surnames only.
 
-[Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) is a string distance metric which counts the number of transpositions that would be required to transform one string into another. It tends to work better than Levenshtein for shorter strings of text.
+<details>
+  <summary>Example</summary>
 
-    $ csvmatch data1.csv data2.csv --fuzzy jaro
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore words-leading \
+        > matches.csv
 
-    name,Person Name
-    George Smiley,George SMILEY
-    Percy Alléline,Peter Guillam
-    Percy Alléline,Sam Collins
-    Toby Esterhase,Tony Esterhase
-    Peter Guíllam,Peter Guillam
-    Connie Sachs,Konny Saks
+  The resulting matches include Toby and Tony Esterhase, Jim Prideaux and Mr Jim Prideaux, Kretzschmar and Claus Kretzschmar, as well as Roy and Richard Bland:
 
-Here we can see a couple of incorrect matches for Percy Alléline, but Connie Sachs has matched.
+  | name           |  place   | codename | Person Name       | Location       |
+  |----------------|----------|----------|-------------------|----------------|
+  | Toby Esterhase | Vienna   | Poorman  | Tony Esterhase    | Vienna         |
+  | Jim Prideaux   | Slovakia | none     | Mr Jim Prideaux   | Czech Republic |
+  | Kretzschmar    | Hamburg  | none     | Claus Kretzschmar | Hamburg        |
+  | Roy Bland      | London   | Soldier  | Richard Bland     | London         |
+  | Roy Bland      | London   | Soldier  | Roy Bland         | UK             |
+  | Sam Collins    | Vietnam  | none     | Sam Collins       | Vietnam        |
+</details>
 
-#### Metaphone
+**`words-tailing`** ignore all words except the first.
 
-[Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) is a phonetic matching algorithm, which compares strings based on how they are pronounced:
+<details>
+  <summary>Example</summary>
 
-    $ csvmatch data1.csv data2.csv --fuzzy metaphone
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore words-tailing \
+        > matches.csv
 
-    name,Person Name
-    George Smiley,George SMILEY
-    Peter Guillam,Peter Guillam
-    Connie Sachs,Konny Saks
+  The resulting matches include Peter Guillam Esq and Peter Guillam, Roy Bland and Roy Rodgers, as well as the two capitalisations of George Smiley:
 
-This shows a match for Connie Sachs and Konny Saks, despite their very different spellings.
+  | name              | place   | codename  | Person Name   | Location |
+  |-------------------|---------|-----------|---------------|----------|
+  | Peter Guillam Esq | Brixton | none      | Peter Guillam | Brixton  |
+  | Roy Bland         | London  | Soldier   | Roy Rodgers   | Romania  |
+  | George Smiley     | London  | Beggerman | George SMILEY | London   |
+  | Roy Bland         | London  | Soldier   | Roy Bland     | UK       |
+  | Sam Collins       | Vietnam | none      | Sam Collins   | Vietnam  |
+</details>
 
+**`words-order`** ignores the order in which the words are given. This is useful for matching names given surname-first with those given forename-first.
 
-Common installation problems
-----------------------------
+<details>
+  <summary>Example</summary>
 
-### `No module named 'numpy'`
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore words-order \
+        > matches.csv
 
-If you're on a Mac, this could mean you need to install the Xcode command line developer tools. These can be installed by:
+  The resulting matches include Oliver Lacon, whose name is written surname-first in the second file:
 
-    $ xcode-select --install
+  | name         | place   | codename | Person Name  | Location  |
+  |--------------|---------|----------|--------------|-----------|
+  | Oliver Lacon | London  | none     | Lacon Oliver | Cambridge |
+  | Roy Bland    | London  | Soldier  | Roy Bland    | UK        |
+  | Sam Collins  | Vietnam | none     | Sam Collins  | Vietnam   |
+</details>
 
-Then click install on the prompt that appears. After it's finished, try installing CSV Match again.
+**`titles`** ignores common English name prefixes such as Mr and Ms. There is a full list of these titles [here](https://github.com/maxharlow/textmatch/blob/main/src/textmatch/ignored-titles.txt).
 
-### `Broken toolchain: cannot link a simple C program`
+<details>
+  <summary>Example</summary>
 
-If you're on a Mac, this could mean you need to accept the Xcode licence. To do this:
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore titles \
+        > matches.csv
 
-    $ sudo xcodebuild -license accept
+  The resulting matches include Jim Prideaux, who has the title 'Mr' in the second file:
 
-You'll be asked for your password. After it's finished, try installing CSV Match again.
+  | name         | place    | codename | Person Name     | Location       |
+  |--------------|----------|----------|-----------------|----------------|
+  | Jim Prideaux | Slovakia | none     | Mr Jim Prideaux | Czech Republic |
+  | Roy Bland    | London   | Soldier  | Roy Bland       | UK             |
+  | Sam Collins  | Vietnam  | none     | Sam Collins     | Vietnam        |
+</details>
 
+**`regex`** ignores terms specific to your data using a given regular expression. This is specified inline: `regex=EXPRESSION`.
 
-A note on uniqueness
---------------------
+<details>
+  <summary>Example</summary>
 
-Both with exact matches and fuzzy matching a name being the same is [no guarantee](https://en.wikipedia.org/wiki/List_of_most_popular_given_names) it refers to the same person. But the inverse is also true -- even with CSV Match, a combination of first inital and last name is likely to be sufficiently different from forename, middle names, and surname together that a match is unlikely. Moreso if one name includes a typo, either accidential or deliberate.
+  To use the regular expression ` Esq$` to ignore the word 'Esq' where it appear at the end of a value:
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore 'regex= Esq$' \
+        > matches.csv
+
+The resulting matches include Peter Guillam, who has the name suffix 'Esq' in the first file:
+
+  | name              | place   | codename | Person Name   | Location |
+  |-------------------|---------|----------|---------------|----------|
+  | Peter Guillam Esq | Brixton | none     | Peter Guillam | Brixton  |
+  | Roy Bland         | London  | Soldier  | Roy Bland     | UK       |
+  | Sam Collins       | Vietnam | none     | Sam Collins   | Vietnam  |
+</details>
+
+### Methods & thresholds
+
+The `methods` argument accepts one or more methods. This lets you specify the algorithm which is used to do the matching. Multiple methods are used for [blocking](#blocking).
+
+There are three different categories of method:
+
+* _Compared_ methods work by comparing every row from the first file with every row from the second, producing a number that represents the degree of the match. This means the amount of time required to run a match grows exponentially with the size of the input files. However, they are still useful for larger matches when using [blocking](#blocking).
+* _Applied_ methods transform text into a different representation before they are matched up. These methods are quicker than compared ones, though no meaningful matching degree number is generated – either they match or they don't.
+* _Custom_ methods have their own individual approach. CSV Match only has one, [Bilenko](#bilenko). It generates a matching degree number.
+
+For those matching methods that generate a matching degree number there is then a threshold filter for any two records to be considered to be a match – you can adjust this with the `--threshold` argument, which accepts one or more numbers between 0.0 and 1.0, defaulting to 0.6. Multiple thresholds are also used for [blocking](#blocking).
+
+You can also include the matching degree number as a column by specifying it in the [outputs](#outputs).
+
+> [!WARNING]
+> When working with names of people, exact matches, even when other pieces of information such as birthdays are included, are not a guarantee that the two names actually refer to the same human. Furthermore, the chance of a mismatch is unintuitively high – as illustrated by [the birthday paradox](https://pudding.cool/2018/04/birthday-paradox/).
+
+**`literal`** is the default – it matches strings exactly, after ignored characteristics have been taken into account.
+
+**`levenshtein`** Uses the [Damerau-Levenshtein](https://en.wikipedia.org/wiki/Damerau–Levenshtein_distance) string distance metric that counts the number of changes that would have to be made to transform one string into another. Performs compared matching. Where two strings are of different lengths the longer string is used as the denominator for the threshold filter. Good at picking up typos and other small differences in spelling.
+
+<details>
+  <summary>Example</summary>
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --method levenshtein \
+        > matches.csv
+
+  The resulting matches include various names with small typographical differences, though the most emblematic of this matching method would be Toby and Tony Esterhase:
+
+  | name              | place    | codename  | Person Name       | Location       |
+  |-------------------|----------|-----------|-------------------|----------------|
+  | Sam Collins       | Vietnam  | none      | Sam Collins       | Vietnam        |
+  | Roy Bland         | London   | Soldier   | Roy Bland         | UK             |
+  | George Smiley     | London   | Beggerman | George SMILEY     | London         |
+  | Bill Haydon       | London   | Tailor    | Bill-Haydon       | London         |
+  | Perçy Allélíne    | London   | Tinker    | Percy Alleline    | London         |
+  | Kretzschmar       | Hamburg  | none      | Claus Kretzschmar | Hamburg        |
+  | Jim Prideaux      | Slovakia | none      | Mr Jim Prideaux   | Czech Republic |
+  | Peter Guillam Esq | Brixton  | none      | Peter Guillam     | Brixton        |
+  | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
+</details>
+
+**`jaro`** uses the [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro–Winkler_distance) string distance metric that counts characters in common, though it considers differences near the start of the string to be more significant than differences near the end. Performs compared matching. It tends to work better than Levenshtein for shorter strings of text.
+
+<details>
+  <summary>Example</summary>
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --method jaro \
+        > matches.csv
+
+  The resulting matches includes many more matches than `levenshtein`, though also many more false positives:
+
+  | name              | place    | codename  | Person Name       | Location       |
+  |-------------------|----------|-----------|-------------------|----------------|
+  | Sam Collins       | Vietnam  | none      | Percy Alleline    | London         |
+  | Sam Collins       | Vietnam  | none      | Sam Collins       | Vietnam        |
+  | Roy Bland         | London   | Soldier   | Richard Bland     | London         |
+  | Roy Bland         | London   | Soldier   | Roy Rodgers       | Romania        |
+  | Roy Bland         | London   | Soldier   | Bill-Haydon       | London         |
+  | Roy Bland         | London   | Soldier   | Roy Bland         | UK             |
+  | George Smiley     | London   | Beggerman | George SMILEY     | London         |
+  | Bill Haydon       | London   | Tailor    | Bill-Haydon       | London         |
+  | Bill Haydon       | London   | Tailor    | Roy Bland         | UK             |
+  | Perçy Allélíne    | London   | Tinker    | Peter Guillam     | Brixton        |
+  | Perçy Allélíne    | London   | Tinker    | Percy Alleline    | London         |
+  | Kretzschmar       | Hamburg  | none      | Claus Kretzschmar | Hamburg        |
+  | Jim Prideaux      | Slovakia | none      | Mr Jim Prideaux   | Czech Republic |
+  | Peter Guillam Esq | Brixton  | none      | Peter Guillam     | Brixton        |
+  | Toby Esterhase    | Vienna   | Poorman   | Tony Esterhase    | Vienna         |
+  | Toby Esterhase    | Vienna   | Poorman   | Roy Rodgers       | Romania        |
+  | Connie Sachs      | Oxford   | none      | Konny Saks        | Oxford         |
+</details>
+
+**`metaphone`** uses the [Double Metaphone](https://en.wikipedia.org/wiki/Metaphone#Double_Metaphone) phonetic encoding algorithm to convert words into a representation of how they are pronounced. Performs applied matching. Tends to work better for data which has been transcribed or transliterated.
+
+<details>
+  <summary>Example</summary>
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --method metaphone \
+        > matches.csv
+
+  The resulting matches includes those with nonalphanumeric differences, as well as Connie Sachs and Konny Saks, names written quite differently that would be pronounced the same:
+
+  | name          | place   | codename  | Person Name   | Location |
+  |---------------|---------|-----------|---------------|----------|
+  | Connie Sachs  | Oxford  | none      | Konny Saks    | Oxford   |
+  | Roy Bland     | London  | Soldier   | Roy Bland     | UK       |
+  | George Smiley | London  | Beggerman | George SMILEY | London   |
+  | Sam Collins   | Vietnam | none      | Sam Collins   | Vietnam  |
+  | Bill Haydon   | London  | Tailor    | Bill-Haydon   | London   |
+</details>
+
+**`bilenko`** uses [Dedupe](https://github.com/dedupeio/dedupe), a library built by Forest Gregg and Derek Eder based on the work of Mikhail Bilenko that will ask you to train it by asking whether different pairs of records should match. The information you give it is then extrapolated to match up the rest of the file. The more examples you give it, the better the results will be. At minimum, try to provide 10 positive matches and 10 negative matches. Performs custom matching.
+
+### Blocking
+
+Blocking is the approach of performing multiple matches, with subsequent matches only applying to the subset of matches resulting from the previous match. This can make matches both quicker and more precise. This is an advanced topic, and can be ignored if you are happy with the quality of matches and are dealing with smaller files.
+
+In a 'regular' match, you are really just matching using a single block. Each block is defined by: a list of fields for each file, a list of ignores, a method, and a threshold. To perform a blocked match CSV Match needs to know each of these things for each block. You specify these through list arguments, or through outer lists for those arguments where the block requires a list itself. If you specify one of these things less than the total number of blocks – such as if you had two blocks, but specified the threshold once – that value will then be used for all subsequent blocks.
+
+<details>
+  <summary>Example</summary>
+
+  To specify a first block that does a case-insensitive literal match on surnames, then a second block performing a Levenshtein match on forenames:
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --ignore case words-leading \
+        --ignore words-tailing \
+        --method literal levenshtein \
+        > matches.csv
+
+  |     name      |  place  | codename  |    Person Name    | Location |
+  |---------------|---------|-----------|-------------------|----------|
+  | Kretzschmar   | Hamburg | none      | Claus Kretzschmar | Hamburg  |
+  | George Smiley | London  | Beggerman | George SMILEY     | London   |
+  | Roy Bland     | London  | Soldier   | Roy Bland         | UK       |
+  | Sam Collins   | Vietnam | none      | Sam Collins       | Vietnam  |
+</details>
+
+### Outputs
+
+The `output` argument accepts a list of column names which should appear in the output, each prefixed with a number and a dot indicating which file that field is from. They are case-sensitive, and can be in any order you desire. It defaults to all columns in the first file, followed by all columns in the second.
+
+There are some special column definitions: `1*` and `2*` expand into all columns from the first and second files respectively, and `degree` will add a column with the matching degree number.
+
+<details>
+  <summary>Example</summary>
+
+  To include every column from the second file, followed by the **codename** column from the first, followed by the matching degree:
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --method levenshtein \
+        --output '2*' 1.codename degree \
+        > matches.csv
+
+  | Person Name       | Location       | codename  | degree     |
+  |-------------------|----------------|-----------|------------|
+  | Sam Collins       | Vietnam        | none      | 1.0        |
+  | Roy Bland         | UK             | Soldier   | 1.0        |
+  | George SMILEY     | London         | Beggerman | 0.61538464 |
+  | Bill-Haydon       | London         | Tailor    | 0.90909094 |
+  | Percy Alleline    | London         | Tinker    | 0.78571427 |
+  | Claus Kretzschmar | Hamburg        | none      | 0.64705884 |
+  | Mr Jim Prideaux   | Czech Republic | none      | 0.8        |
+  | Peter Guillam     | Brixton        | none      | 0.7647059  |
+  | Tony Esterhase    | Vienna         | Poorman   | 0.9285714  |
+</details>
+
+### Join types
+
+The `join` argument takes a string that indicates what other nonmatching records should be included in the output. A `left-outer` join will return everything from the first file, whether there was a match or not, a `right-outer` to do the same but for the second file, and a `full-outer` to return everything from both files. Where two rows didn't match the values will be blank. Defaults to an `inner` join, where only successful matches are returned.
+
+<details>
+  <summary>Example</summary>
+
+  To include all rows from the first file, but only those that match from the second:
+
+    $ csvmatch \
+        data1.csv \
+        data2.csv \
+        --fields1 name \
+        --fields2 'Person Name' \
+        --join left-outer \
+        > matches.csv
+
+  | name              | place    | codename  | Person Name | Location |
+  |-------------------|----------|-----------|-------------|----------|
+  | Roy Bland         | London   | Soldier   | Roy Bland   | UK       |
+  | Sam Collins       | Vietnam  | none      | Sam Collins | Vietnam  |
+  | George Smiley     | London   | Beggerman |             |          |
+  | Bill Haydon       | London   | Tailor    |             |          |
+  | Perçy Allélíne    | London   | Tinker    |             |          |
+  | Kretzschmar       | Hamburg  | none      |             |          |
+  | Oliver Lacon      | London   | none      |             |          |
+  | Jim Prideaux      | Slovakia | none      |             |          |
+  | Peter Guillam Esq | Brixton  | none      |             |          |
+  | Toby Esterhase    | Vienna   | Poorman   |             |          |
+  | Connie Sachs      | Oxford   | none      |             |          |
+</details>

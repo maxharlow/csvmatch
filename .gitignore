@@ -1,8 +1,5 @@
 .*
 !.gitignore
 
-*.pyc
-*.egg-info
-venv
-build
+__pycache__
 dist
