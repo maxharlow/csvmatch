@@ -552,12 +552,12 @@ files = [
 
 [[package]]
 name = "pytz"
-version = "2023.4"
+version = "2024.1"
 summary = "World timezone definitions, modern and historical"
 groups = ["default"]
 files = [
-    {file = "pytz-2023.4-py2.py3-none-any.whl", hash = "sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a"},
-    {file = "pytz-2023.4.tar.gz", hash = "sha256:31d4583c4ed539cd037956140d695e42c033a19e984bfce9964a3f7d59bc2b40"},
+    {file = "pytz-2024.1-py2.py3-none-any.whl", hash = "sha256:328171f4e3623139da4983451950b28e95ac706e13f3f2630a879749e7a8b319"},
+    {file = "pytz-2024.1.tar.gz", hash = "sha256:2a29735ea9c18baf14b448846bde5a48030ed267578472d8955cd0e7443a9812"},
 ]
 
 [[package]]
@@ -642,7 +642,7 @@ files = [
 
 [[package]]
 name = "textmatch"
-version = "1.0.0"
+version = "1.0.1"
 requires_python = "==3.11.*"
 summary = "Find fuzzy matches between datasets."
 groups = ["default"]
@@ -655,8 +655,8 @@ dependencies = [
     "unidecode==1.3.*",
 ]
 files = [
-    {file = "textmatch-1.0.0-py3-none-any.whl", hash = "sha256:7271d34d8e7d494392aeb43c238664892956a16999b8a92723945b9e5575d127"},
-    {file = "textmatch-1.0.0.tar.gz", hash = "sha256:655f38ff8df6c9ecb11be297a96e2305ec094210160dfe45ec89b700c08fec1f"},
+    {file = "textmatch-1.0.1-py3-none-any.whl", hash = "sha256:71add95c0324952506b70efa8c98d9c1349af4838427652c509c0b0d99d53a48"},
+    {file = "textmatch-1.0.1.tar.gz", hash = "sha256:aabdc2035d9ae9e264b2a96a0b251fd51790c3782f4518de8325877919fcac8d"},
 ]
 
 [[package]]
@@ -719,7 +719,7 @@ files = [
 
 [[package]]
 name = "zope-index"
-version = "6.0"
+version = "6.1"
 requires_python = ">=3.7"
 summary = "Indices for using with catalog like text, field, etc."
 groups = ["default"]
@@ -730,13 +730,13 @@ dependencies = [
     "zope-interface",
 ]
 files = [
-    {file = "zope.index-6.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d91675b41949a05f323567ee6eb022ebf402f647381fd64b585f674997bc5516"},
-    {file = "zope.index-6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:c1e9804e527225b4ac9269d6680f2f77826ca0c1bddc14d5785557b4c7a28327"},
-    {file = "zope.index-6.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:53aa12ca4f39d82a5d8ea6cb95ddccb54e0fa928ce1a8ab1c3679dc7496cdf35"},
-    {file = "zope.index-6.0-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:270b5ec48cd7b937e089734516937234b42909a8503f65032c2f9409d809fa41"},
-    {file = "zope.index-6.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c9315f4b4d81d92ca940143506f4cc0c4f40dd803986b22dba4bd36db67be5b6"},
-    {file = "zope.index-6.0-cp311-cp311-win_amd64.whl", hash = "sha256:0869330c36bf736ede9b0238f1e702fc3899063864806c2f050c570c3fac2e4f"},
-    {file = "zope.index-6.0.tar.gz", hash = "sha256:61ceefd2cf57c16deb10ff6e954ad50f481860d10782eb92b3b45d2df3de45e4"},
+    {file = "zope.index-6.1-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:e90c4172c2f39541ff45d393eb966591922c6c36d76f7857bd31b4149ee1ec11"},
+    {file = "zope.index-6.1-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:0d84c263e1d0a5f95e2bf55c402d675f2aded080eaf17848afe3d22f38b16dd7"},
+    {file = "zope.index-6.1-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1e527a5b4e67668ad710716afc0e9d64a4e14497bb6ce8b888f26beec3e5f6e3"},
+    {file = "zope.index-6.1-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:573691a31f76917c383baa7cf9af47b9bc9d504054be48396c7ad4652901760b"},
+    {file = "zope.index-6.1-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:0d584eab0d83597d95dadf6d1bb22eba90060ab4242d3b99390b92848dabfc73"},
+    {file = "zope.index-6.1-cp311-cp311-win_amd64.whl", hash = "sha256:3ebd3b85a461d128b19eeb6a7bf3286895cfd8c61efa64b8b151ae9e5ff9a543"},
+    {file = "zope.index-6.1.tar.gz", hash = "sha256:99f1e041771add767428b12967c54bdb2152b17df9233d1671efabdfe01f6524"},
 ]
 
 [[package]]
