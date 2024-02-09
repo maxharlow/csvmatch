@@ -161,7 +161,7 @@ Combining different forms of ignorance can be quite powerful. The order in which
   | Sam Collins | Vietnam | none     | Sam Collins | Vietnam  |
 </details>
 
-**`nonlatin`** ignores nonlatin characters – so a character such as an `é` will be seen as if it were an `e`.
+**`nonlatin`** ignores non-Latin characters – so `Jérôme` will match `Jerome`, `Weiß` will match `Weiss`, and `Пушкин` will match `Pushkin`. The further the script is from the Latin alphabet, the less accurate this transliteration will be.
 
 <details>
   <summary>Example</summary>
