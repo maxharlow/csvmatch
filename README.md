@@ -13,6 +13,14 @@ The best way to install is with `pipx`, which can be installed with Homebrew: `b
 
     pipx install csvmatch
 
+If you get an error installing the most likely cause is an unsupported version of Python being used. You can find out which Python version is required [in this file](https://github.com/maxharlow/csvmatch/blob/master/pyproject.toml) then specify that version, eg:
+
+    pipx install --python 3.x --fetch-missing-python csvmatch
+
+If it installs without problems but you get a 'command not found' error when you run it, try:
+
+    pipx ensurepath
+
 
 Getting started
 ---------------
