@@ -113,7 +113,7 @@ def read(filename: str, encoding: Optional[str], alert: Alert) -> PolarsDatafram
         alert(f'{filename}: autodetected character encoding as {encoding.upper()}')
     columns = polars.read_csv(filename, encoding=encoding, n_rows=0).columns
     columns_new = disambiguate(columns)
-    return polars.read_csv(filename, new_columns=columns_new, encoding=encoding, infer_schema_length=0) # zero infer length ensures all columns are read as strings
+    return polars.read_csv(filename, new_columns=columns_new, encoding=encoding, infer_schema=False)
 
 def format(results: ArrowDataframe) -> None:
     cast(ArrowDataframe, polars.from_arrow(results)).write_csv(sys.__stdout__)
