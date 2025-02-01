@@ -1,9 +1,10 @@
 try:
+    from typing import Callable, Optional
     import sys
-    from typing import Callable
     import datetime
     import colorama
     import tqdm
+    from .typings import Finalise, Progress, Alert
 except KeyboardInterrupt:
     raise SystemExit(1)
 
@@ -33,18 +34,20 @@ class tqdm_custom(tqdm.tqdm):
         super_format_dict.update(duration=duration, dynamic_newline=dynamic_newline)
         return super_format_dict
 
-def alert(message: str, importance: str = 'info') -> None:
-    if importance == 'error': message = colorama.Style.BRIGHT + colorama.Fore.RED + message + colorama.Style.RESET_ALL
-    if importance == 'warning': message = colorama.Style.BRIGHT + colorama.Fore.MAGENTA + message + colorama.Style.RESET_ALL
-    sys.stderr.write(f'{message}\n')
-
-def progress(operation: str, total: int) -> Callable[[], None]:
-    sys.stderr.write('\n')
-    bar = tqdm_custom(desc=operation, total=total, bar_format='\x1b[F{desc: <30} |{bar}| {percentage:3.0f}% {duration: >11}{dynamic_newline}', dynamic_ncols=True)
-    def update() -> None: bar.update()
-    return update
-
-def finalise(mode: str) -> None:
-    if mode == 'interrupt': sys.stderr.write('\rInterrupted!')
-    elif mode == 'error': sys.stderr.write('\rFailed!')
-    elif mode == 'complete': sys.stderr.write('Success!\n')
+def setup(verbose: bool) -> tuple[Alert, Progress, Finalise]:
+    def alert(message: str, *, importance: Optional[str] = None) -> None:
+        if not importance and not verbose: return
+        if importance == 'error': message = colorama.Style.BRIGHT + colorama.Fore.RED + message + colorama.Style.RESET_ALL
+        if importance == 'warning': message = colorama.Style.BRIGHT + colorama.Fore.MAGENTA + message + colorama.Style.RESET_ALL
+        sys.stderr.write(f'{message}\n')
+    def progress(operation: str, total: int) -> Callable[[], None]:
+        sys.stderr.write('\n')
+        bar = tqdm_custom(desc=operation, total=total, bar_format='\x1b[F{desc: <30} |{bar}| {percentage:3.0f}% {duration: >11}{dynamic_newline}', dynamic_ncols=True)
+        def update() -> None: bar.update()
+        return update
+    def finalise(mode: str, message: Optional[str] = None) -> None:
+        if message: alert(message, importance='error')
+        if mode == 'interrupt': sys.stderr.write('\rInterrupted!')
+        elif mode == 'error': sys.stderr.write('\rFailed!')
+        elif mode == 'complete': sys.stderr.write('Success!\n')
+    return alert, progress, finalise

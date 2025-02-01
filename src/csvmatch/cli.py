@@ -1,15 +1,5 @@
+from typing import Optional, cast
 import sys
-import signal
-import multiprocessing
-from .cli_renderer import alert, progress, finalise
-
-def interrupt(signal, frame):
-    finalise('interrupt')
-    raise SystemExit(1)
-signal.signal(signal.SIGINT, interrupt)
-if (len(sys.argv) != 1 and '-v' not in sys.argv and '--version' not in sys.argv and multiprocessing.current_process().name == 'MainProcess'): alert('Starting up...')
-
-from typing import Optional, TypeAlias
 import os
 import io
 import re
@@ -18,17 +8,21 @@ import traceback
 import argparse
 import chardet
 import polars
-import pyarrow
 import textmatch
 
-ArrowDataframe: TypeAlias = pyarrow.Table
-PolarsDataframe: TypeAlias = polars.DataFrame
+from . import cli_renderer
+from .typings import (
+    ArrowDataframe,
+    PolarsDataframe,
+    Alert
+)
 
 def main() -> None:
     file1, file2, args, verbose = arguments()
+    alert, progress, finalise = cli_renderer.setup(verbose)
     try:
-        source1 = read(*file1)
-        source2 = read(*file2)
+        source1 = read(*file1, alert)
+        source2 = read(*file2, alert)
         results = textmatch.run(source1, source2, **{**args, 'progress': progress, 'alert': alert})
         finalise('complete')
         format(results)
@@ -36,8 +30,7 @@ def main() -> None:
     except KeyboardInterrupt:
         pass
     except Exception as e:
-        alert(traceback.format_exc().strip() if verbose else str(e), 'error')
-        finalise('error')
+        finalise('error', traceback.format_exc().strip() if verbose else str(e))
         sys.exit(1)
 
 def arguments() -> tuple[tuple[str, str], tuple[str, str], dict[str, str], bool]:
@@ -88,7 +81,7 @@ def arguments() -> tuple[tuple[str, str], tuple[str, str], dict[str, str], bool]
     verbose = args.pop('verbose')
     return (file1, enc1), (file2, enc2), args, verbose
 
-def read(filename: str, encoding: Optional[str]) -> PolarsDataframe:
+def read(filename: str, encoding: Optional[str], alert: Alert) -> PolarsDataframe:
     if not os.path.isfile(filename) and filename != '-': raise Exception(f'{filename}: no such file')
     if os.path.getsize(filename) == 0: raise Exception(f'{filename}: file is empty')
     def disambiguate(columns: list[str]) -> list[str]:
@@ -123,4 +116,4 @@ def read(filename: str, encoding: Optional[str]) -> PolarsDataframe:
     return polars.read_csv(filename, new_columns=columns_new, encoding=encoding, infer_schema_length=0) # zero infer length ensures all columns are read as strings
 
 def format(results: ArrowDataframe) -> None:
-    polars.from_arrow(results).write_csv(sys.__stdout__)
+    cast(ArrowDataframe, polars.from_arrow(results)).write_csv(sys.__stdout__)
