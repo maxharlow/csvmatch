@@ -3,6 +3,7 @@ import sys
 import os
 import io
 import re
+import signal
 import importlib.metadata
 import traceback
 import argparse
@@ -20,6 +21,10 @@ from .typings import (
 def main() -> None:
     file1, file2, args, verbose = arguments()
     alert, progress, finalise = cli_renderer.setup(verbose)
+    def interrupt(signal, frame):
+        finalise('interrupt')
+        raise SystemExit(1)
+    signal.signal(signal.SIGINT, interrupt)
     try:
         source1 = read(*file1, alert)
         source2 = read(*file2, alert)
@@ -27,8 +32,6 @@ def main() -> None:
         finalise('complete')
         format(results)
         sys.exit()
-    except KeyboardInterrupt:
-        pass
     except Exception as e:
         finalise('error', traceback.format_exc().strip() if verbose else str(e))
         sys.exit(1)

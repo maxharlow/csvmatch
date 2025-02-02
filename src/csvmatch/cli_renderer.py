@@ -1,12 +1,9 @@
-try:
-    from typing import Callable, Optional
-    import sys
-    import datetime
-    import colorama
-    import tqdm
-    from .typings import Finalise, Progress, Alert
-except KeyboardInterrupt:
-    raise SystemExit(1)
+from typing import Callable, Optional
+import sys
+import datetime
+import colorama
+import tqdm
+from .typings import Finalise, Progress, Alert
 
 colorama.just_fix_windows_console()
 
@@ -35,6 +32,7 @@ class tqdm_custom(tqdm.tqdm):
         return super_format_dict
 
 def setup(verbose: bool) -> tuple[Alert, Progress, Finalise]:
+    finalisation = False
     def alert(message: str, *, importance: Optional[str] = None) -> None:
         if not importance and not verbose: return
         if importance == 'error': message = colorama.Style.BRIGHT + colorama.Fore.RED + message + colorama.Style.RESET_ALL
@@ -46,8 +44,11 @@ def setup(verbose: bool) -> tuple[Alert, Progress, Finalise]:
         def update() -> None: bar.update()
         return update
     def finalise(mode: str, message: Optional[str] = None) -> None:
+        nonlocal finalisation
+        if finalisation: return
+        finalisation = True
         if message: alert(message, importance='error')
         if mode == 'interrupt': sys.stderr.write('\rInterrupted!')
-        elif mode == 'error': sys.stderr.write('\rFailed!')
+        elif mode == 'error': sys.stderr.write('Failed!\n')
         elif mode == 'complete': sys.stderr.write('Success!\n')
     return alert, progress, finalise
