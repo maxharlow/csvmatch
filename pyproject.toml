@@ -14,7 +14,7 @@ authors = [
     {name = "Max Harlow", email = "contact@maxharlow.com"}
 ]
 dependencies = [
-    "textmatch == 1.0.*",
+    "textmatch == 1.1.*",
     "polars[pyarrow,pandas] == 1.21.*",
     "chardet == 5.2.*",
     "colorama == 0.4.*",
