@@ -37,7 +37,7 @@ def main() -> None:
         sys.exit(1)
 
 def arguments() -> tuple[tuple[str, str], tuple[str, str], dict[str, str], bool]:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(usage='%(prog)s [options] FILE1 FILE2')
     parser.add_argument('-v', '--version', action='version', version=importlib.metadata.version('csvmatch'))
     parser.add_argument('-V', '--verbose', action='store_true', help='print more information')
     parser.add_argument('FILE1', help='first file')
